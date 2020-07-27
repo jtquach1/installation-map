@@ -1,0 +1,7 @@
+node_modules
+build
+.dockerignore
+Dockerfile
+Dockerfile.prod
+host_frontend.dockerfile
+create_json.dockerfile
