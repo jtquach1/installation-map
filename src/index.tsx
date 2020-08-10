@@ -5,7 +5,7 @@ import "./index.css";
 
 import MapChart from "./MapChart";
 
-function App(): JSX.Element {
+const App = (): JSX.Element => {
   // Default tooltip
   const [content, setContent] = useState("");
   // Default column data, based on waypoint object
@@ -37,7 +37,7 @@ function App(): JSX.Element {
       <ReactTooltip>{content}</ReactTooltip>
     </div>
   );
-}
+};
 
 const rootElement = document.getElementById("root");
 ReactDOM.render(<App />, rootElement);

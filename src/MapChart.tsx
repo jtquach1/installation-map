@@ -52,34 +52,47 @@ const MapChart = (props: { functions: setters }): JSX.Element => {
   const [position, setPosition] = useState({ coordinates: [0, 0], zoom: 1 });
 
   // For zoom in/out buttons
-  function handleZoomIn(): void {
+  const handleZoomIn = (): void => {
     if (position.zoom >= 4) return;
     setPosition((pos) => ({ ...pos, zoom: pos.zoom * 2 }));
-  }
+  };
 
-  function handleZoomOut(): void {
+  const handleZoomOut = (): void => {
     if (position.zoom <= 1) return;
     setPosition((pos) => ({ ...pos, zoom: pos.zoom / 2 }));
-  }
+  };
 
-  function handleMoveEnd(pos: position): void {
+  const handleMoveEnd = (pos: position): void => {
     setPosition(pos);
-  }
+  };
+
+  const handleZoomFont = (zoom: number): number => {
+    const baseSize = 12;
+    return baseSize / zoom;
+  };
 
   // Display city names next to markers based on zoom level
-  function isVisible(): boolean {
+  const isVisible = (): boolean => {
     return position.zoom >= 1.5;
-  }
+  };
 
-  function toPoint(coordinates: number[]): Point {
+  const toPoint = (coordinates: number[]): Point => {
     return [coordinates[0], coordinates[1]];
-  }
+  };
 
   return (
     <div className="mapchart">
       <div className="controls-wrapper">
         <text>Zoom: {position.zoom}, </text>
-        <text>isVisible(): {isVisible().toString()}</text>
+        <text>isVisible(): {isVisible().toString()}, </text>
+        <text>
+          Coordinates:
+          {" (" +
+            position.coordinates[0] +
+            ", " +
+            position.coordinates[1] +
+            ")"}
+        </text>
         <div className="controls">
           <button onClick={handleZoomIn}>
             <svg
@@ -161,11 +174,8 @@ const MapChart = (props: { functions: setters }): JSX.Element => {
                   <text
                     textAnchor="middle"
                     y={-12}
-                    style={{
-                      fontFamily: "system-ui",
-                      fill: "#5D5A6D",
-                      fontSize: 10,
-                    }}
+                    className="institution"
+                    style={{ fontSize: handleZoomFont(position.zoom) }}
                   >
                     {institution}
                   </text>

@@ -80,3 +80,7 @@ svg {
 .controls > button:first-child {
   margin-right: 0.25rem;
 }
+.institution {
+  font-family: system-ui;
+  fill: #5d5a6d;
+}
