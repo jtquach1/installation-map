@@ -71,6 +71,10 @@ const MapChart = (props: { functions: setters }): JSX.Element => {
     return baseSize / zoom;
   };
 
+  const handleMarkerScale = (zoom: number) => {
+    return "scale(" + 1 / zoom + ")";
+  };
+
   // Display city names next to markers based on zoom level
   const isVisible = (): boolean => {
     return position.zoom >= 1.5;
@@ -166,7 +170,9 @@ const MapChart = (props: { functions: setters }): JSX.Element => {
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  transform="translate(-12, -24)"
+                  transform={
+                    "translate(-12, -24) " + handleMarkerScale(position.zoom)
+                  }
                 >
                   <path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 6.9 8 11.7z" />
                 </g>
