@@ -20,19 +20,8 @@ function App(): JSX.Element {
   const [x, y] = coordinates;
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "row",
-      }}
-    >
-      <div
-        className="left"
-        style={{
-          flex: 2,
-          alignSelf: "stretch",
-        }}
-      >
+    <div id="wrapper">
+      <div className="left">
         <h1>Institution or Company Name</h1>
         <p>{institution}</p>
         <h1>Category</h1>

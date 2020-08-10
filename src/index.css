@@ -22,9 +22,14 @@ svg {
   vertical-align: middle;
 }
 
+#wrapper {
+  display: flex;
+  flex-direction: row;
+}
+
 .controls {
   display: flex;
-  margin: 1.25rem 0 0 0;
+  margin: 1.25rem 0;
   position: relative;
   justify-content: center;
 }
@@ -48,6 +53,8 @@ svg {
 .left {
   background-color: #f9f9f9;
   padding-left: 20px;
+  flex: 2;
+  align-self: stretch;
 }
 
 .left h1 {
