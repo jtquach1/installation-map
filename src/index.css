@@ -23,6 +23,12 @@ svg {
   vertical-align: middle;
 }
 
+@font-face {
+  font-family: "WebSymbols";
+  src: local("WebSymbols"),
+    url(./fonts/WebSymbols-Regular.otf) format("opentype");
+}
+
 #wrapper {
   display: flex;
   flex-direction: row;
@@ -79,4 +85,15 @@ svg {
 
 .controls > button:first-child {
   margin-right: 0.25rem;
+}
+
+.marker {
+  font-family: WebSymbols, Arial;
+  /* font-size: 16px; */
+  font-size: 1.5rem !important;
+}
+
+.map-marker {
+  width: 100%;
+  height: auto;
 }

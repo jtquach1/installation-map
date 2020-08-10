@@ -22,6 +22,8 @@ function App(): JSX.Element {
   return (
     <div id="wrapper">
       <div className="left">
+        <p className="marker">?</p>
+
         <h1>Institution or Company Name</h1>
         <p>{institution}</p>
         <h1>Category</h1>

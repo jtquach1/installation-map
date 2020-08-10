@@ -73,6 +73,8 @@ const MapChart = (props: { functions: setters }): JSX.Element => {
   return (
     <div className="mapchart">
       <div className="controls-wrapper">
+        <text>Zoom: {position.zoom}, </text>
+        <text>isVisible(): {isVisible().toString()}</text>
         <div className="controls">
           <button onClick={handleZoomIn}>
             <svg
