@@ -53,7 +53,7 @@ const MapChart = (props: { functions: setters }): JSX.Element => {
 
   // For zoom in/out buttons
   const handleZoomIn = (): void => {
-    if (position.zoom >= 4) return;
+    if (position.zoom >= 8) return;
     setPosition((pos) => ({ ...pos, zoom: pos.zoom * 2 }));
   };
 
@@ -173,19 +173,23 @@ const MapChart = (props: { functions: setters }): JSX.Element => {
                   setTooltipContent("");
                 }}
               >
+                {/* "Place" From Material Design, Apache license version 2.0 */}
                 <g
-                  fill="#3786c2"
-                  stroke="#3786c2"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+                  xmlns="http://www.w3.org/2000/svg"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  width="24"
                   transform={
                     handleMarkerTranslate(position.zoom) +
                     " " +
                     handleMarkerScale(position.zoom)
                   }
                 >
-                  <path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 6.9 8 11.7z" />
+                  <path d="M0 0h24v24H0z" fill="none" />
+                  <path
+                    fill="#3786c2"
+                    d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"
+                  />
                 </g>
                 {isVisible() && (
                   <text
