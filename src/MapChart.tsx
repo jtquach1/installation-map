@@ -75,7 +75,7 @@ const MapChart = (props: { functions: setters }): JSX.Element => {
     return "scale(" + 1 / zoom + ")";
   };
 
-  const handleMarkerTransform = (zoom: number) => {
+  const handleMarkerTranslate = (zoom: number) => {
     const x = -12 / zoom;
     const y = -24 / zoom;
     return "translate(" + x + ", " + y + ")";
@@ -177,7 +177,7 @@ const MapChart = (props: { functions: setters }): JSX.Element => {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   transform={
-                    handleMarkerTransform(position.zoom) +
+                    handleMarkerTranslate(position.zoom) +
                     " " +
                     handleMarkerScale(position.zoom)
                   }
