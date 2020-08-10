@@ -67,18 +67,21 @@ const MapChart = (props: { functions: setters }): JSX.Element => {
   };
 
   const handleZoomFont = (zoom: number): number => {
-    const baseSize = 12;
-    return baseSize / zoom;
+    return 12 / zoom;
   };
 
-  const handleMarkerScale = (zoom: number) => {
+  const handleMarkerScale = (zoom: number): string => {
     return "scale(" + 1 / zoom + ")";
   };
 
-  const handleMarkerTranslate = (zoom: number) => {
+  const handleMarkerTranslate = (zoom: number): string => {
     const x = -12 / zoom;
     const y = -24 / zoom;
     return "translate(" + x + ", " + y + ")";
+  };
+
+  const handleZoomY = (zoom: number): number => {
+    return 12 / zoom - zoom / 12;
   };
 
   // Display city names next to markers based on zoom level
@@ -187,7 +190,7 @@ const MapChart = (props: { functions: setters }): JSX.Element => {
                 {isVisible() && (
                   <text
                     textAnchor="middle"
-                    y={-12}
+                    y={handleZoomY(position.zoom)}
                     className="institution"
                     style={{ fontSize: handleZoomFont(position.zoom) }}
                   >
