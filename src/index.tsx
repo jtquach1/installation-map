@@ -33,7 +33,7 @@ function App(): JSX.Element {
         <h1>Coordinates</h1>
         <p>{x !== 0 && y !== 0 && "(" + x + "," + y + ")"}</p>
       </div>
-      <MapChart functions={[setContent, setColumn]} flexAmount={4} />
+      <MapChart functions={[setContent, setColumn]} />
       <ReactTooltip>{content}</ReactTooltip>
     </div>
   );

@@ -29,12 +29,8 @@ interface setters
 const geoUrl =
   "https://raw.githubusercontent.com/zcreativelabs/react-simple-maps/master/topojson-maps/world-110m.json";
 
-const MapChart = (props: {
-  functions: setters;
-  flexAmount: number;
-}): JSX.Element => {
+const MapChart = (props: { functions: setters }): JSX.Element => {
   const [setTooltipContent, setColumnContent] = props.functions;
-  const flexAmount = props.flexAmount;
 
   // Promise to get markers for served build
   const [markers, setMarkers] = React.useState([]);
@@ -75,35 +71,36 @@ const MapChart = (props: {
   }
 
   return (
-    <div style={{ flex: flexAmount }}>
-      <div className="controls">
-        <button onClick={handleZoomIn}>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth="3"
-          >
-            <line x1="12" y1="5" x2="12" y2="19" />
-            <line x1="5" y1="12" x2="19" y2="12" />
-          </svg>
-        </button>
-        <button onClick={handleZoomOut}>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth="3"
-          >
-            <line x1="5" y1="12" x2="19" y2="12" />
-          </svg>
-        </button>
+    <div className="mapchart">
+      <div className="controls-wrapper">
+        <div className="controls">
+          <button onClick={handleZoomIn}>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth="3"
+            >
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+          </button>
+          <button onClick={handleZoomOut}>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth="3"
+            >
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+          </button>
+        </div>
       </div>
-
       <ComposableMap data-tip="" projectionConfig={{ scale: 200 }}>
         <ZoomableGroup
           zoom={position.zoom}

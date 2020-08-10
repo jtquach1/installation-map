@@ -5,6 +5,7 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-y: hidden;
 }
 
 code {
@@ -25,29 +26,6 @@ svg {
 #wrapper {
   display: flex;
   flex-direction: row;
-}
-
-.controls {
-  display: flex;
-  margin: 1.25rem 0;
-  position: relative;
-  justify-content: center;
-}
-
-.controls > button {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 0;
-  height: 2rem;
-  width: 2rem;
-  background: #3786c2;
-  color: #fff;
-  border-radius: 100%;
-  border: 0;
-}
-.controls > button:first-child {
-  margin-right: 0.25rem;
 }
 
 .left {
@@ -72,6 +50,33 @@ svg {
   margin-bottom: 60px !important;
 }
 
-.fa-map-marker-alt {
-  color: #3786c2;
+.mapchart {
+  flex: 8;
+}
+
+.controls-wrapper {
+  width: 75%;
+  position: fixed;
+}
+
+.controls {
+  display: flex;
+  margin: 1.25rem 0 0 0;
+  justify-content: center;
+}
+
+.controls > button {
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+  height: 2rem;
+  width: 2rem;
+  background: #3786c2;
+  color: #fff;
+  border-radius: 100%;
+  border: 0;
+}
+
+.controls > button:first-child {
+  margin-right: 0.25rem;
 }
