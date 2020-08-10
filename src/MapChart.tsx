@@ -25,6 +25,11 @@ interface setters
   1: React.Dispatch<React.SetStateAction<column>>;
 }
 
+interface position {
+  coordinates: Point | number[];
+  zoom: number;
+}
+
 // World map
 const geoUrl =
   "https://raw.githubusercontent.com/zcreativelabs/react-simple-maps/master/topojson-maps/world-110m.json";
@@ -57,8 +62,8 @@ const MapChart = (props: { functions: setters }): JSX.Element => {
     setPosition((pos) => ({ ...pos, zoom: pos.zoom / 2 }));
   }
 
-  function handleMoveEnd(): void {
-    setPosition(position);
+  function handleMoveEnd(pos: position): void {
+    setPosition(pos);
   }
 
   // Display city names next to markers based on zoom level
