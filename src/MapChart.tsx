@@ -84,6 +84,10 @@ const MapChart = (props: { functions: setters }): JSX.Element => {
     return 12 / zoom - zoom / 12;
   };
 
+  const handleZoomStroke = (zoom: number): number => {
+    return 1 / zoom;
+  };
+
   // Display city names next to markers based on zoom level
   const isVisible = (): boolean => {
     return position.zoom >= 1.5;
@@ -148,6 +152,7 @@ const MapChart = (props: { functions: setters }): JSX.Element => {
                   geography={geo}
                   fill="#EAEAEC"
                   stroke="#D6D6DA"
+                  strokeWidth={handleZoomStroke(position.zoom)}
                 />
               ))
             }
