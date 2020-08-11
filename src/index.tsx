@@ -2,22 +2,20 @@ import React, { useState } from "react";
 import ReactDOM from "react-dom";
 import ReactTooltip from "react-tooltip";
 import "./index.css";
-
 import MapChart from "./MapChart";
+import { row, setters } from "./mapStyleConsts";
 
 const App = (): JSX.Element => {
-  // Default tooltip
-  const [content, setContent] = useState("");
-  // Default column data, based on waypoint object
-  const [column, setColumn] = useState({
+  const [tooltipContent, setTooltipContent] = useState("");
+  const [currentMarker, setCurrentMarker] = useState({
     institution: "",
     category: "",
     lab: "",
     address: "",
-    coordinates: [0, 0], // in lng, lat
-  });
-  const { institution, category, lab, address, coordinates } = column;
-  const [x, y] = coordinates;
+    coordinates: [0, 0],
+  } as row);
+  const { institution, category, lab, address, coordinates } = currentMarker;
+  const [lng, lat] = coordinates;
 
   return (
     <div id="wrapper">
@@ -31,10 +29,10 @@ const App = (): JSX.Element => {
         <h1>Address</h1>
         <p>{address}</p>
         <h1>Coordinates</h1>
-        <p>{x !== 0 && y !== 0 && "(" + x + "," + y + ")"}</p>
+        <p>{lng !== 0 && lat !== 0 && "(" + lng + "," + lat + ")"}</p>
       </div>
-      <MapChart functions={[setContent, setColumn]} />
-      <ReactTooltip>{content}</ReactTooltip>
+      <MapChart functions={[setTooltipContent, setCurrentMarker] as setters} />
+      <ReactTooltip>{tooltipContent}</ReactTooltip>
     </div>
   );
 };

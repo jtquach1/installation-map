@@ -26,4 +26,4 @@ yarn-error.log*
 
 token.pickle
 credentials.json
-.env
+env.sh
