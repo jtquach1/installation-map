@@ -15,10 +15,7 @@ SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
 
 # The ID and range of a spreadsheet.
 SPREADSHEET_ID = os.getenv('SPREADSHEET_ID')
-SHEET_NAME = os.getenv('SHEET_NAME')
-UPDATED_SHEET_NAME = os.getenv('UPDATED_SHEET_NAME')
-LEFT_COL = os.getenv('LEFT_COL')
-RIGHT_COL = os.getenv('RIGHT_COL')
+COLS = os.getenv('COLS')
 
 ### Geocoding API ###
 GEOCODING_API_KEY = os.getenv('GEOCODING_API_KEY')
@@ -50,8 +47,9 @@ def create_waypoints(input_sheet):
     finally:
         keys = extract_keys()
         filtered = list(filter(lambda row: is_successful(row, keys), rows))
-        mapped = list(map(lambda row: create_waypoint(row, keys), filtered))
-        final += mapped
+        waypoints = list(map(lambda row: create_waypoint(row, keys), filtered))
+        valid_waypoints = list(filter(is_valid, waypoints))
+        final += valid_waypoints
         out_file = open(input_sheet, 'w')
         json.dump(final, out_file)
         out_file.close()
@@ -64,11 +62,10 @@ def extract_rows(input_sheet):
     input_sheet, from the 1-indexed Google Sheet.
     """
     row_num = next_row_number(input_sheet)
-    range_name = extract_range_name(row_num, None)
-    rows = extract_values(SCOPES, SPREADSHEET_ID, range_name)
-    if rows:
-        for i, row in enumerate(rows, start=row_num):
-            row.append(i)
+    ranges = extract_ranges(COLS, row_num, None)
+    rows = extract_values(SCOPES, SPREADSHEET_ID, ranges)
+    for i, row in enumerate(rows, start=row_num):
+        row.append(i)
     return rows
 
 
@@ -76,8 +73,8 @@ def extract_keys():
     """
     Gets an array keys, which is the first row in the 1-indexed Google Sheet.
     """
-    range_name = extract_range_name(1, 1)
-    keys = extract_values(SCOPES, SPREADSHEET_ID, range_name)[0]
+    ranges = extract_ranges(COLS, 1, 1)
+    keys = extract_values(SCOPES, SPREADSHEET_ID, ranges)[0]
     keys.append('index')
     return keys
 
@@ -100,17 +97,27 @@ def is_successful(row, keys):
 def create_waypoint(row, keys):
     """
     Given a geocode_result array, header keys, and row array, this creates a
-    dictionary waypoint.
+    dictionary waypoint. If geocode_result is empty, then return an empty 
+    waypoint. 
     """
     city = row[keys.index('City')]
     state = row[keys.index('State / Province')]
     country = row[keys.index('Country')]
     geocode_result = extract_geocode_result(city, state, country)
+    if not geocode_result:
+        return {}
     waypoint = convert_array_to_dict(keys, row)
     waypoint = add_coordinates_and_address(geocode_result, waypoint)
     waypoint = remove_extraneous_columns(waypoint)
     waypoint = rename_keys(waypoint)
     return waypoint
+
+
+def is_valid(waypoint):
+    """
+    Given a dictionary waypoint, check whether it is empty. 
+    """
+    return not not waypoint
 
 
 def next_row_number(input_sheet):
@@ -131,31 +138,79 @@ def next_row_number(input_sheet):
         return row_num
 
 
-def extract_range_name(left_row_num, right_row_num):
+def extract_ranges(cols, left_row_num, right_row_num):
     """
-    Gets the range_name for making a Geocoding API spreadsheets.values.get 
-    call. If right_row_num is not an int, then the returned range_name will
-    indicate the entire Google Sheet beyond left_row_num. 
+    From the arrays left_cols and right_cols, this gets the ranges array for 
+    making a Geocoding API spreadsheets.values.batchGet call. All ranges must 
+    begin and end at the same row number, or else a ragged array is returned.
     """
-    # change SHEET_NAME to UPDATED_SHEET_NAME to test updating functionality
-    # SHEET_NAME = UPDATED_SHEET_NAME
+    ranges = []
+    pair = extract_cols(cols)
+    left_cols = pair[0]
+    right_cols = pair[1]
+    for left, right in zip(left_cols, right_cols):
+        ranges.append(extract_range(left, right, left_row_num, right_row_num))
+    return ranges
+
+
+def extract_values(scopes, spreadsheet_id, ranges):
+    """
+    Reads a Google Sheet, selects variable ranges of columns, joins the 
+    columns as an array of rows, and returns the rows as a 2D array of 
+    strings. 
+    """
+    creds = get_creds(None, scopes)
+    service = build('sheets', 'v4', credentials=creds)
+
+    # Call the Sheets API
+    sheet = service.spreadsheets()
+    result = sheet.values().batchGet(spreadsheetId=spreadsheet_id,
+                                     ranges=ranges,
+                                     majorDimension='COLUMNS').execute()
+    value_ranges = result.get('valueRanges', [])
+    column_values = []
+    for response in value_ranges:
+        column_values.extend(response["values"])
+    values_as_list_of_tuples = list(zip(*column_values))
+    dump = json.dumps(values_as_list_of_tuples)
+    row_values = json.loads(dump)
+    return row_values
+
+
+def extract_cols(cols):
+    """
+    Given a string cols which contains a variable number of ranges and is 
+    space delimited by left:right couples, this returns a pair of arrays 
+    denoting the left and right columns.
+    """
+    left_cols = []
+    right_cols = []
+    couples = cols.split(" ")
+    for couple in couples:
+        separated = couple.split(":")
+        left_cols.append(separated[0])
+        right_cols.append(separated[1])
+    return (left_cols, right_cols)
+
+
+def extract_range(left_col, right_col, left_row_num, right_row_num):
+    """
+    Gets a range. If right_row_num is not an int, then the returned ranges 
+    will indicate the entire Google Sheet beyond left_row_num. 
+    """
     try:
-        range_name = '%s!%s%d:%s%d' % (
-            SHEET_NAME, LEFT_COL, left_row_num, RIGHT_COL, right_row_num)
+        r = '%s%d:%s%d' % (left_col, left_row_num, right_col, right_row_num)
     except TypeError:
-        range_name = '%s!%s%d:%s' % (
-            SHEET_NAME, LEFT_COL, left_row_num, RIGHT_COL)
+        r = '%s%d:%s' % (left_col, left_row_num, right_col)
     finally:
-        return range_name
+        return r
 
 
-def extract_values(scopes, spreadsheet_id, range_name):
+def get_creds(creds, scopes):
     """
     Adapted from the Google Sheets Python Quickstart guide at 
     https://developers.google.com/sheets/api/quickstart/python.
-    Reads a spreadsheet and returns an array corresponding to a given range.
     """
-    creds = None
     # The file token.pickle stores the user's access and refresh tokens, and is
     # created automatically when the authorization flow completes for the first
     # time.
@@ -173,15 +228,7 @@ def extract_values(scopes, spreadsheet_id, range_name):
         # Save the credentials for the next run
         with open('token.pickle', 'wb') as token:
             pickle.dump(creds, token)
-
-    service = build('sheets', 'v4', credentials=creds)
-
-    # Call the Sheets API
-    sheet = service.spreadsheets()
-    result = sheet.values().get(spreadsheetId=spreadsheet_id,
-                                range=range_name).execute()
-    values = result.get('values', [])
-    return values
+    return creds
 
 
 def extract_geocode_result(city, state, country):
@@ -212,7 +259,7 @@ def convert_array_to_dict(keys, row):
 
 def add_coordinates_and_address(geocode_result, row):
     """
-    Returns a dictionary row that contains the coordinates and address keys.
+    Updates a dictionary row with new coordinates and address keys.
     """
     formatted_address = geocode_result[0]['formatted_address']
     location = geocode_result[0]['geometry']['location']
