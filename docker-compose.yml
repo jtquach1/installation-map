@@ -10,7 +10,7 @@ services:
       - GEOCODING_API_KEY=${GOOGLE_GEOCODING_API_KEY}
     volumes:
       - ".:/app"
-      - "./build/static/:/app/build/static"
+      - "./src/waypoints.json:/app/build/static/waypoints.json"
       - "/app/node_modules"
   host-frontend:
     image: host-frontend:latest
@@ -18,6 +18,6 @@ services:
       context: .
       dockerfile: host-frontend.dockerfile
     volumes:
-      - "./build/static/waypoints.json:/app/static/waypoints.json"
+      - "./src/waypoints.json:/app/static/waypoints.json"
     ports:
       - "5000:80"

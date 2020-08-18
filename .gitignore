@@ -10,6 +10,7 @@
 
 # production
 /build
+/docker
 
 # misc
 .DS_Store
@@ -27,3 +28,4 @@ yarn-error.log*
 token.pickle
 credentials.json
 env.sh
+__pycache__/

@@ -4,6 +4,7 @@ RUN apt-get --yes update
 RUN apt-get --yes install python3-pip
 RUN pip3 install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib
 RUN pip3 install -U googlemaps
+RUN pip3 install apscheduler
 
 WORKDIR /app
 COPY quickstart.py ./
