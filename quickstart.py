@@ -8,6 +8,7 @@ import sys
 import googlemaps
 from datetime import datetime
 import json
+from apscheduler.schedulers.blocking import BlockingScheduler
 
 ### Google Sheets API ###
 # If modifying these scopes, delete the file token.pickle.
@@ -173,7 +174,7 @@ def extract_values(scopes, spreadsheet_id, ranges):
     value_ranges = result.get('valueRanges', [])
     column_values = []
     for response in value_ranges:
-        column_values.extend(response["values"])
+        column_values.extend(response.get('values', []))
     values_as_list_of_tuples = list(zip(*column_values))
     dump = json.dumps(values_as_list_of_tuples)
     row_values = json.loads(dump)
@@ -304,8 +305,15 @@ def main():
     Gets specified columns from a Google Sheet, geocodes addresses to 
     (lng, lat) coordinates, and produces a waypoints JSON file.
     """
+    print("Updating JSON file!")
     create_waypoints(WAYPOINTS)
 
 
 if __name__ == '__main__':
-    main()
+    scheduler = BlockingScheduler()
+    scheduler.add_job(main,
+                      trigger='cron',
+                      hour='*',
+                      minute='*',
+                      second='0')
+    scheduler.start()
