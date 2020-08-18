@@ -1,1 +1,74 @@
-[{"index": 2, "coordinates": [-77.4105409, 39.41426879999999], "address": "Frederick, MD, USA", "institution": "NCI-Frederick", "category": "Research Institute", "lab": "MoCha"}, {"index": 3, "coordinates": [-71.10973349999999, 42.3736158], "address": "Cambridge, MA, USA", "institution": "Broad Institute ", "category": "Research Institute", "lab": "Hahn Lab"}, {"index": 6, "coordinates": [4.8945398, 52.3666969], "address": "Amsterdam, Netherlands", "institution": "NKI", "category": "Medical Center", "lab": ""}, {"index": 7, "coordinates": [0.121817, 52.205337], "address": "Cambridge, UK", "institution": "MRC Cancer Unit", "category": "Medical Center", "lab": "Fitzgerald"}]
+[
+  {
+    "index": 2,
+    "coordinates": [-77.4105409, 39.41426879999999],
+    "address": "Frederick, MD, USA",
+    "institution": "NCI-Frederick",
+    "category": "Research Institute",
+    "lab": "MoCha"
+  },
+  {
+    "index": 3,
+    "coordinates": [-71.10973349999999, 42.3736158],
+    "address": "Cambridge, MA, USA",
+    "institution": "Broad Institute ",
+    "category": "Research Institute",
+    "lab": "Hahn Lab"
+  },
+  {
+    "index": 6,
+    "coordinates": [4.8945398, 52.3666969],
+    "address": "Amsterdam, Netherlands",
+    "institution": "NKI",
+    "category": "Medical Center",
+    "lab": ""
+  },
+  {
+    "index": 7,
+    "coordinates": [0.121817, 52.205337],
+    "address": "Cambridge, UK",
+    "institution": "MRC Cancer Unit",
+    "category": "Medical Center",
+    "lab": "Fitzgerald"
+  },
+  {
+    "index": 17,
+    "coordinates": [71, 25],
+    "address": "Cambridge, UK",
+    "institution": "MRC Cancer Unit",
+    "category": "Medical Center",
+    "lab": "Fitzgerald"
+  },
+  {
+    "index": 22,
+    "coordinates": [-19, 4],
+    "address": "Frederick, MD, USA",
+    "institution": "NCI-Frederick",
+    "category": "Research Institute",
+    "lab": "MoCha"
+  },
+  {
+    "index": 23,
+    "coordinates": [-97, 58],
+    "address": "Cambridge, MA, USA",
+    "institution": "Broad Institute ",
+    "category": "Research Institute",
+    "lab": "Hahn Lab"
+  },
+  {
+    "index": 26,
+    "coordinates": [98, 52],
+    "address": "Amsterdam, Netherlands",
+    "institution": "NKI",
+    "category": "Medical Center",
+    "lab": ""
+  },
+  {
+    "index": 27,
+    "coordinates": [17, 37],
+    "address": "Cambridge, UK",
+    "institution": "MRC Cancer Unit",
+    "category": "Medical Center",
+    "lab": "Fitzgerald"
+  }
+]

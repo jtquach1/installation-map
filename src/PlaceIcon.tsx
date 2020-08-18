@@ -1,8 +1,9 @@
 import React from "react";
+import { PlaceIconProps } from "./mapStyleConsts";
 
 // "Place" From Material Design, Apache license version 2.0
-const PlaceIcon = (props: { transform: string }): JSX.Element => {
-  const { transform } = props;
+const PlaceIcon = (props: PlaceIconProps): JSX.Element => {
+  const { transform, markerColor } = props;
   return (
     <g
       xmlns="http://www.w3.org/2000/svg"
@@ -13,7 +14,7 @@ const PlaceIcon = (props: { transform: string }): JSX.Element => {
     >
       <circle cx="12" cy="9" r="3" fillOpacity="0" />
       <path
-        fill="#3786c2"
+        fill={markerColor}
         d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"
       />
     </g>
