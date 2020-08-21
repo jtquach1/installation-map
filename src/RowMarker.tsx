@@ -14,7 +14,7 @@ import {
 
 const RowMarker = (props: RowMarkerProps): JSX.Element => {
   const { row, zoom, stateManager } = props;
-  const { institution, coordinates } = row;
+  const { institution, coordinates, index } = row;
   const [state, dispatch] = stateManager;
   const getMarkerColor =
     row === state.currentMarker ? primaryColor : tertiaryColor;
@@ -32,6 +32,7 @@ const RowMarker = (props: RowMarkerProps): JSX.Element => {
       onMouseLeave={() => {
         dispatch({ type: "tooltipContent", value: "" });
       }}
+      id={`marker-${index}`}
     >
       <PlaceIcon
         transform={handleMarkerTranslate(zoom) + " " + handleMarkerScale(zoom)}

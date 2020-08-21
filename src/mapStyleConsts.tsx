@@ -174,7 +174,19 @@ export const createTableRows = (
         return (
           <tr
             key={rowIndex}
-            onClick={() => dispatch({ type: "currentMarker", value: row })}
+            onClick={() => {
+              dispatch({ type: "currentMarker", value: row });
+              const id = `marker-${row.index}`;
+              const element = document.getElementById(id) as HTMLElement;
+              console.log(element);
+              console.log(element.onclick);
+              element.onclick = () => {
+                console.log("element onclick set!");
+              };
+              console.log(element);
+              console.log(element.onclick);
+              element.click();
+            }}
             style={{ background: getRowColor }}
           >
             {keys.map(
