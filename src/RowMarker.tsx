@@ -5,39 +5,44 @@ import {
   RowMarkerProps,
   handleMarkerTranslate,
   handleMarkerScale,
+  handleMarkerOffset,
   displayOnLargeZoom,
-  handleZoomY,
-  handleZoomFont,
+  handleMarkerFontSize,
+  primaryColor,
+  tertiaryColor,
 } from "./mapStyleConsts";
 
 const RowMarker = (props: RowMarkerProps): JSX.Element => {
-  const { row, setters, zoom } = props;
-  const [setTooltipContent, setCurrentMarker] = setters;
+  const { row, zoom, stateManager } = props;
   const { institution, coordinates } = row;
+  const [state, dispatch] = stateManager;
+  const getMarkerColor =
+    row === state.currentMarker ? primaryColor : tertiaryColor;
 
   return (
     <Marker
       onClick={() => {
-        setCurrentMarker(row);
+        dispatch({ type: "currentMarker", value: row });
       }}
       key={institution}
       coordinates={coordinates}
       onMouseEnter={() => {
-        setTooltipContent(institution);
+        dispatch({ type: "tooltipContent", value: institution });
       }}
       onMouseLeave={() => {
-        setTooltipContent("");
+        dispatch({ type: "tooltipContent", value: "" });
       }}
     >
       <PlaceIcon
         transform={handleMarkerTranslate(zoom) + " " + handleMarkerScale(zoom)}
+        markerColor={getMarkerColor}
       />
       {displayOnLargeZoom(zoom) && (
         <text
           textAnchor="middle"
-          y={handleZoomY(zoom)}
+          y={handleMarkerOffset(zoom)}
           className="institution"
-          style={{ fontSize: handleZoomFont(zoom) }}
+          style={{ fontSize: handleMarkerFontSize(zoom) }}
         >
           {institution}
         </text>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   ComposableMap,
   Geographies,
@@ -9,27 +9,20 @@ import { ReactComponent as ZoomIn } from "./zoom-in.svg";
 import { ReactComponent as ZoomOut } from "./zoom-out.svg";
 import RowMarker from "./RowMarker";
 import {
-  row,
-  setters,
-  position,
   geoUrl,
-  handleZoomStroke,
   minZoom,
   maxZoom,
   displayDebuggingFeatures,
+  MapChartProps,
+  position,
+  handleStrokeWidth,
+  secondaryColor,
 } from "./mapStyleConsts";
 
-const MapChart = (props: { functions: setters }): JSX.Element => {
-  // Promise to get markers for served build
-  const [markers, setMarkers] = React.useState([]);
-  useEffect(() => {
-    const fetchMarkers = async () => {
-      const response = await fetch("/static/waypoints.json");
-      const markers = await response.json();
-      setMarkers(markers);
-    };
-    fetchMarkers();
-  }, []);
+const MapChart = (props: MapChartProps): JSX.Element => {
+  const { stateManager } = props;
+  const [state] = stateManager;
+  const markers = state.markers;
 
   const [mousePosition, setMousePosition] = useState({
     coordinates: [0, 0],
@@ -38,7 +31,10 @@ const MapChart = (props: { functions: setters }): JSX.Element => {
 
   const handleZoomIn = (zoom: number): void => {
     if (zoom < maxZoom) {
-      setMousePosition((pos) => ({ ...pos, zoom: pos.zoom * 2 }));
+      setMousePosition((pos) => ({
+        ...pos,
+        zoom: pos.zoom * 2,
+      }));
     }
   };
 
@@ -48,19 +44,21 @@ const MapChart = (props: { functions: setters }): JSX.Element => {
     }
   };
 
-  const handleMoveEnd = (pos: position): void => {
-    setMousePosition(pos);
-  };
-
   return (
     <div className="mapchart">
       <div className="controls-wrapper">
         {displayDebuggingFeatures(true, mousePosition)}
         <div className="controls">
-          <button onClick={() => handleZoomIn(mousePosition.zoom)}>
+          <button
+            onClick={() => handleZoomIn(mousePosition.zoom)}
+            style={{ background: secondaryColor }}
+          >
             <ZoomIn />
           </button>
-          <button onClick={() => handleZoomOut(mousePosition.zoom)}>
+          <button
+            onClick={() => handleZoomOut(mousePosition.zoom)}
+            style={{ background: secondaryColor }}
+          >
             <ZoomOut />
           </button>
         </div>
@@ -69,7 +67,7 @@ const MapChart = (props: { functions: setters }): JSX.Element => {
         <ZoomableGroup
           zoom={mousePosition.zoom}
           center={mousePosition.coordinates}
-          onMoveEnd={handleMoveEnd}
+          onMoveEnd={setMousePosition}
           minZoom={minZoom}
           maxZoom={maxZoom}
         >
@@ -81,18 +79,18 @@ const MapChart = (props: { functions: setters }): JSX.Element => {
                   geography={geo}
                   fill="#EAEAEC"
                   stroke="#D6D6DA"
-                  strokeWidth={handleZoomStroke(mousePosition.zoom)}
+                  strokeWidth={handleStrokeWidth(mousePosition.zoom)}
                 />
               ))
             }
           </Geographies>
-          {markers.map((row: row) => {
+          {markers.map((row) => {
             return (
               <RowMarker
                 key={row.index}
                 row={row}
-                setters={props.functions}
                 zoom={mousePosition.zoom}
+                stateManager={stateManager}
               />
             );
           })}

@@ -1,38 +1,30 @@
-import React, { useState } from "react";
+import React, { useEffect, useReducer } from "react";
 import ReactDOM from "react-dom";
 import ReactTooltip from "react-tooltip";
 import "./index.css";
+import { reducer, defaultState } from "./mapStyleConsts";
 import MapChart from "./MapChart";
-import { row, setters } from "./mapStyleConsts";
+import SideBar from "./SideBar";
 
 const App = (): JSX.Element => {
-  const [tooltipContent, setTooltipContent] = useState("");
-  const [currentMarker, setCurrentMarker] = useState({
-    institution: "",
-    category: "",
-    lab: "",
-    address: "",
-    coordinates: [0, 0],
-  } as row);
-  const { institution, category, lab, address, coordinates } = currentMarker;
-  const [lng, lat] = coordinates;
+  const stateManager = useReducer(reducer, defaultState);
+  const [state, dispatch] = stateManager;
+
+  // Promise to get markers for served build
+  useEffect(() => {
+    const fetchMarkers = async (): Promise<void> => {
+      const response = await fetch("/static/waypoints.json");
+      const markers = await response.json();
+      dispatch({ type: "setMarkers", value: markers });
+    };
+    fetchMarkers();
+  }, [dispatch]);
 
   return (
     <div id="wrapper">
-      <div className="left">
-        <h1>Institution or Company Name</h1>
-        <p>{institution}</p>
-        <h1>Category</h1>
-        <p>{category}</p>
-        <h1>Lab / Group</h1>
-        <p>{lab}</p>
-        <h1>Address</h1>
-        <p>{address}</p>
-        <h1>Coordinates</h1>
-        <p>{lng !== 0 && lat !== 0 && "(" + lng + "," + lat + ")"}</p>
-      </div>
-      <MapChart functions={[setTooltipContent, setCurrentMarker] as setters} />
-      <ReactTooltip>{tooltipContent}</ReactTooltip>
+      <SideBar stateManager={stateManager} />
+      <MapChart stateManager={stateManager} />
+      <ReactTooltip>{state.tooltipContent}</ReactTooltip>
     </div>
   );
 };
