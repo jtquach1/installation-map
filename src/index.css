@@ -30,14 +30,14 @@ svg {
 
 .left {
   background-color: #f9f9f9;
-  flex: 3;
   align-self: stretch;
+  width: 30%;
 }
 
 .left h1 {
   font-size: 24px;
-  color: #3786c2 !important;
-  font-family: Helvetica Neue, Helvetica, Arial, sans-serif !important;
+  color: #3786c2;
+  font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
   font-weight: 500;
   line-height: 1.1;
   margin: 0.67em 0;
@@ -45,13 +45,8 @@ svg {
   padding-left: 20px;
 }
 
-.left p {
-  font-size: 20px;
-  margin-bottom: 60px !important;
-}
-
 .mapchart {
-  flex: 11;
+  width: 70%;
 }
 
 .controls-wrapper {
@@ -83,7 +78,7 @@ svg {
   overflow-y: auto;
   height: 20em;
 }
-.tableFixHead thead th {
+.waypoints thead th {
   position: sticky;
   top: 0;
 }
@@ -96,9 +91,6 @@ th,
 td {
   padding: 8px 16px;
 }
-th {
-  background: #eee;
-}
-.tableFixHead:first-child {
+.tableFixHead:first-of-type {
   margin-bottom: 2em;
 }

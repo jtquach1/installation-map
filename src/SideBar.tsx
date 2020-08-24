@@ -1,28 +1,24 @@
 import React from "react";
-import {
-  createTableHeader,
-  createTableRows,
-  markerDetailMap,
-  createWaypointDetails,
-  SideBarProps,
-} from "./mapStyleConsts";
+import * as Config from "./Config";
+import * as Functions from "./Functions";
+import * as Types from "./Types";
 
-const SideBar = (props: SideBarProps): JSX.Element => {
-  const { stateManager } = props;
-  const keys = ["institution", "lab", "address"];
-
+const SideBar = (props: Types.SideBarProps): JSX.Element => {
   return (
     <div className="left">
-      <div className="tableFixHead">
-        <h1>Waypoints</h1>
+      <h1>Waypoints</h1>
+      <div className="tableFixHead waypoints">
         <table>
-          {createTableHeader(keys)}
-          {createTableRows(stateManager, keys)}
+          {Functions.createWaypointsTableHead(Config.tableHeaderKeys)}
+          {Functions.createWaypointsTableBody(
+            props.stateManager,
+            Config.tableHeaderKeys
+          )}
         </table>
       </div>
-      <div className="tableFixHead">
-        <h1>Selected waypoint details</h1>
-        <table>{createWaypointDetails(stateManager, markerDetailMap)}</table>
+      <h1>Selected waypoint details</h1>
+      <div className="tableFixHead waypoint-details">
+        <table>{Functions.createWaypointDetails(props.stateManager)}</table>
       </div>
     </div>
   );
