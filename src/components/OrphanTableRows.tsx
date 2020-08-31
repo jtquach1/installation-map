@@ -1,11 +1,12 @@
 import React from "react";
-import * as Functions from "./Functions";
-import * as Types from "./Types";
+import * as Types from "./../utils/Types";
+import { getTableRowColor } from "../utils/Renderers";
+import { handleMarkerOnClick } from "../utils/EventHandlers";
 
 const OrphanTableRows = (props: Types.OrphanTableRowsProps): JSX.Element => {
   const [state, dispatch] = props.stateManager;
   const rows = props.givenCombinedRow.rows;
-  const combinedRowColor = Functions.getTableRowColor(
+  const combinedRowColor = getTableRowColor(
     props.givenCombinedRow,
     state.currentCombinedRow,
     props.givenIndex
@@ -19,10 +20,7 @@ const OrphanTableRows = (props: Types.OrphanTableRowsProps): JSX.Element => {
       {rows.map((row) => (
         <tr
           key={row.index}
-          onClick={Functions.handleMarkerOnClick(
-            dispatch,
-            props.givenCombinedRow
-          )}
+          onClick={handleMarkerOnClick(dispatch, props.givenCombinedRow)}
           style={{ background: combinedRowColor }}
         >
           {props.keys.map((key, index) => {

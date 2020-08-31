@@ -1,19 +1,21 @@
 import React, { useEffect, useReducer } from "react";
 import ReactDOM from "react-dom";
 import ReactTooltip from "react-tooltip";
-import MapChart from "./MapChart";
-import SideBar from "./SideBar";
-import * as Config from "./Config";
-import * as Functions from "./Functions";
+import MapChart from "./components/MapChart";
+import SideBar from "./components/SideBar";
+import { reducer, getUpdatedCombinedRowsByZoom } from "./utils/StateUpdaters";
+import * as Config from "./utils/Config";
 import "./index.css";
 
 const App = (): JSX.Element => {
-  const stateManager = useReducer(Functions.reducer, Config.defaultState);
+  const stateManager = useReducer(reducer, Config.defaultState);
   const [state, dispatch] = stateManager;
+  const { rows, combinedRows, mousePosition } = state;
+  const { zoom, coordinates } = mousePosition;
 
   // Promise to get markers for served build
   useEffect(() => {
-    const fetchMarkers = async (): Promise<void> => {
+    const fetchMarkers = async () => {
       const response = await fetch("/static/waypoints.json");
       const markers = await response.json();
       dispatch({ type: "setRows", value: markers });
@@ -21,17 +23,16 @@ const App = (): JSX.Element => {
     fetchMarkers();
   }, [dispatch]);
 
-  // Only rerenders when current combinedRows differs from previous
+  /**
+   * Only rerenders when current combinedRows differs from previous.
+   */
   useEffect(() => {
     dispatch({
       type: "updateCombinedRows",
-      value: Functions.getUpdatedCombinedRowsByZoom(
-        state.rows,
-        state.combinedRows,
-        state.mousePosition.zoom
-      ),
+      value: getUpdatedCombinedRowsByZoom(rows, combinedRows, zoom),
     });
-  }, [dispatch, state.rows, state.combinedRows, state.mousePosition.zoom]);
+    console.log("combinedRows", combinedRows);
+  }, [dispatch, rows, combinedRows, zoom, coordinates]);
 
   return (
     <div id="wrapper">
