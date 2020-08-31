@@ -1,52 +1,29 @@
 import React from "react";
-import { Marker } from "react-simple-maps";
 import PlaceIcon from "./PlaceIcon";
-import {
-  RowMarkerProps,
-  handleMarkerTranslate,
-  handleMarkerScale,
-  handleMarkerOffset,
-  displayOnLargeZoom,
-  handleMarkerFontSize,
-  primaryColor,
-  tertiaryColor,
-} from "./mapStyleConsts";
+import { Marker } from "react-simple-maps";
+import * as Functions from "./Functions";
+import * as Types from "./Types";
 
-const RowMarker = (props: RowMarkerProps): JSX.Element => {
-  const { row, zoom, stateManager } = props;
-  const { institution, coordinates } = row;
-  const [state, dispatch] = stateManager;
-  const getMarkerColor =
-    row === state.currentMarker ? primaryColor : tertiaryColor;
+const RowMarker = (props: Types.RowMarkerProps): JSX.Element => {
+  const [state, dispatch] = props.stateManager;
+  const currentZoom = state.mousePosition.zoom;
+  const givenRow = props.givenCombinedRow;
+  const currentRow = state.currentCombinedRow;
+  const combinedName = Functions.getCombinedName(givenRow);
+  const zoomedInEnoughToDisplay = Functions.displayOnLargeZoom(currentZoom);
+  const mapMarkerTransform = Functions.handleMarkerTransform(currentZoom);
+  const mapMarkerColor = Functions.getMapMarkerColor(givenRow, currentRow);
 
   return (
     <Marker
-      onClick={() => {
-        dispatch({ type: "currentMarker", value: row });
-      }}
-      key={institution}
-      coordinates={coordinates}
-      onMouseEnter={() => {
-        dispatch({ type: "tooltipContent", value: institution });
-      }}
-      onMouseLeave={() => {
-        dispatch({ type: "tooltipContent", value: "" });
-      }}
+      onClick={Functions.handleMarkerOnClick(dispatch, givenRow)}
+      coordinates={givenRow.averageCoordinates}
+      onMouseEnter={Functions.handleMarkerOnMouse(dispatch, combinedName)}
+      onMouseLeave={Functions.handleMarkerOnMouse(dispatch)}
     >
-      <PlaceIcon
-        transform={handleMarkerTranslate(zoom) + " " + handleMarkerScale(zoom)}
-        markerColor={getMarkerColor}
-      />
-      {displayOnLargeZoom(zoom) && (
-        <text
-          textAnchor="middle"
-          y={handleMarkerOffset(zoom)}
-          className="institution"
-          style={{ fontSize: handleMarkerFontSize(zoom) }}
-        >
-          {institution}
-        </text>
-      )}
+      <PlaceIcon transform={mapMarkerTransform} markerColor={mapMarkerColor} />
+      {zoomedInEnoughToDisplay &&
+        Functions.createMarkerText(combinedName, currentZoom)}
     </Marker>
   );
 };
