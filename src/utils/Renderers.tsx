@@ -192,7 +192,7 @@ export const createWaypointsTableBody = (
 ): JSX.Element => {
   const [state] = stateManager;
   const originalRows = state.combinedRows;
-  const filterPredicate = isMarkerVisible;
+  const filterPredicate = getFilterPredicate(state);
   return (
     <tbody>
       {originalRows
@@ -202,8 +202,53 @@ export const createWaypointsTableBody = (
   );
 };
 
-const isMarkerVisible = (combinedRow: Types.combinedRow) => {
-  return combinedRow.isMarkerVisible;
+const getFilterPredicate = (state: Types.state) => {
+  const searchBarToggled = state.useSearchBar;
+  const visibilityToggled = state.useMarkerVisibility;
+  if (searchBarToggled && visibilityToggled) {
+    return includesQueryAndVisible(state);
+  } else if (searchBarToggled) {
+    return doesCombinedRowIncludeQuery(state);
+  } else if (visibilityToggled) {
+    return isMarkerVisible;
+  } else {
+    return noFilter;
+  }
+};
+
+const includesQueryAndVisible = (state: Types.state) => (
+  combinedRow: Types.combinedRow
+) => {
+  const includesQuery = doesCombinedRowIncludeQuery(state);
+  return includesQuery(combinedRow) && isMarkerVisible(combinedRow);
+};
+
+const doesCombinedRowIncludeQuery = (state: Types.state) => (
+  givenCombinedRow: Types.combinedRow
+): boolean => {
+  const searchQuery = state.searchBarContent;
+  const childRows = givenCombinedRow.rows;
+  const foundInAnyChildren = childRows.some(doesRowIncludeQuery(searchQuery));
+  return foundInAnyChildren;
+};
+
+const doesRowIncludeQuery = (query: string) => (row: Types.row): boolean => {
+  const keys = Config.tableHeaderKeys;
+  const caseInsensitiveQuery = query.toLowerCase();
+  const foundInAnyKey = keys.some((key) => {
+    const rowProp = row[key].toString();
+    const caseInsensitiveRowProp = rowProp.toLowerCase();
+    return caseInsensitiveRowProp.includes(caseInsensitiveQuery);
+  }, false);
+  return foundInAnyKey;
+};
+
+const isMarkerVisible = (combinedRow: Types.combinedRow): boolean => {
+  return combinedRow.isMarkerVisible as boolean;
+};
+
+const noFilter = (_combinedRow: Types.combinedRow): boolean => {
+  return true;
 };
 
 const createOrphanTableRows = (

@@ -79,3 +79,33 @@ export const handleMarkerOnClick = (
 ) => (): void => {
   dispatch({ type: "setCurrentCombinedRow", value: givenRow });
 };
+
+//////////////////////
+// FilterOptions.tsx
+//////////////////////
+
+export const handleVisibilityToggle = (
+  stateManager: Types.stateManager
+) => (): void => {
+  const [state, dispatch] = stateManager;
+  dispatch({ type: "toggleVisibility", value: !state.useMarkerVisibility });
+};
+
+export const handleInputText = (stateManager: Types.stateManager) => (
+  event: React.ChangeEvent<HTMLInputElement>
+): void => {
+  const [, dispatch] = stateManager;
+  dispatch({ type: "toggleSearchBarQuery", value: true });
+  dispatch({ type: "setSearchBarContent", value: event.target.value });
+};
+
+export const handleInputClear = (
+  stateManager: Types.stateManager
+) => (): void => {
+  const [, dispatch] = stateManager;
+  dispatch({ type: "toggleSearchBarQuery", value: false });
+  dispatch({
+    type: "setSearchBarContent",
+    value: Config.defaultSearchBarContent,
+  });
+};

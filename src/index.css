@@ -5,7 +5,7 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow-y: hidden;
+  background: #eee;
 }
 
 code {
@@ -42,11 +42,12 @@ svg {
   line-height: 1.1;
   margin: 0.67em 0;
   box-sizing: border-box;
-  padding-left: 20px;
+  margin-left: 20px;
 }
 
 .mapchart {
   width: 70%;
+  background: #fff;
 }
 
 .controls-wrapper {
@@ -76,7 +77,7 @@ svg {
 
 .tableFixHead {
   overflow-y: auto;
-  height: 20em;
+  max-height: 18em;
 }
 .waypoints thead th {
   position: sticky;
@@ -92,7 +93,7 @@ td {
   padding: 8px 16px;
 }
 .tableFixHead:first-of-type {
-  margin-bottom: 2em;
+  margin-bottom: 0.67em;
 }
 
 /* The thick country border that gets displayed when clicking on a country is 
@@ -108,4 +109,43 @@ outline-width property still works! How confusing. */
   /* outline-color: -webkit-focus-ring-color; */
   /* outline-style: auto; */
   outline-width: 0px;
+}
+
+.filter-options {
+  float: left;
+  margin-bottom: 1em;
+  margin-left: 20px;
+}
+
+.search {
+  float: left;
+}
+
+.search input[type="text"] {
+  border: none;
+  float: left;
+  font-size: 17px;
+  margin-top: 8px;
+  min-width: 250px;
+  padding: 6px;
+}
+
+.search input[type="button"] {
+  border: none;
+  cursor: pointer;
+  background: #ddd;
+  float: left;
+  font-size: 17px;
+  margin-top: 8px;
+  margin-right: 8px;
+  padding: 6px;
+}
+
+.search button:hover {
+  background: #ccc;
+}
+
+.visibility {
+  float: left;
+  margin-top: 8px;
 }

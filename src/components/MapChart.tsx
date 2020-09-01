@@ -11,7 +11,11 @@ const MapChart = (props: Types.MapChartProps): JSX.Element => {
   return (
     <div className="mapchart">
       <ZoomControls stateManager={props.stateManager} />
-      <ComposableMap id="container" projectionConfig={{ scale: 200 }}>
+      <ComposableMap
+        id={Config.mapContainerName}
+        height={550}
+        projectionConfig={{ scale: 200 }}
+      >
         <ZoomableGroup
           zoom={state.mousePosition.zoom}
           center={state.mousePosition.coordinates}

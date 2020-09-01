@@ -31,8 +31,9 @@ const App = (): JSX.Element => {
       type: "updateCombinedRows",
       value: getUpdatedCombinedRowsByZoom(rows, combinedRows, zoom),
     });
-    console.log("combinedRows", combinedRows);
   }, [dispatch, rows, combinedRows, zoom, coordinates]);
+
+  console.log("state.tooltipContent", state.tooltipContent);
 
   return (
     <div id="wrapper">
