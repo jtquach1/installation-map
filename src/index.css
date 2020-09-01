@@ -94,3 +94,18 @@ td {
 .tableFixHead:first-of-type {
   margin-bottom: 2em;
 }
+
+/* The thick country border that gets displayed when clicking on a country is 
+a bit annoying to look at. It would be nice to have its border scale by zoom, 
+just like the rest of the svg elements. I've tried to modify the width via 
+CSS just to see how the border width works, but it looks like setting the 
+width to any nonnegative number still displays the border with the same 
+visible width. e.g. 500px or 5px or 1px still shows the same thick border. But 
+changing it to 0px makes the border totally disappear, so I know the 
+outline-width property still works! How confusing. */
+.rsm-geography:focus {
+  /* outline: -webkit-focus-ring-color auto 5px; */
+  /* outline-color: -webkit-focus-ring-color; */
+  /* outline-style: auto; */
+  outline-width: 0px;
+}

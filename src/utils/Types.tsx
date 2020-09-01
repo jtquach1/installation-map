@@ -1,9 +1,17 @@
 import { Point } from "react-simple-maps";
 
-export type rowProp = string | Point | number;
-export type combinedProp = Point | row[];
-export type dispatch = React.Dispatch<action>;
-export type zoomHandler = (zoom: number) => void;
+export type RowProp = string | Point | number;
+export type CombinedProp = Point | row[] | number | Visibility;
+export type Dispatch = React.Dispatch<action>;
+export type ZoomHandler = (zoom: number) => void;
+export type Visibility = boolean | undefined;
+export type StateProp =
+  | row[]
+  | combinedRow[]
+  | string
+  | combinedRow
+  | position
+  | number;
 
 export interface row {
   institution: string;
@@ -13,14 +21,16 @@ export interface row {
   coordinates: Point;
   index: number;
 
-  [key: string]: rowProp;
+  [key: string]: RowProp;
 }
 
 export interface combinedRow {
+  index: number;
   averageCoordinates: Point;
   rows: row[];
+  isMarkerVisible: Visibility;
 
-  [key: string]: combinedProp;
+  [key: string]: CombinedProp;
 }
 
 export interface position {
@@ -78,16 +88,20 @@ export interface state {
 
 export interface action {
   type: string;
-  value: row[] | combinedRow[] | string | combinedRow | position | number;
+  value: StateProp;
 }
 
-export interface stateManager extends Array<state | dispatch> {
+export interface stateManager extends Array<state | Dispatch> {
   0: state;
-  1: dispatch;
+  1: Dispatch;
 }
 
 export interface markerDetail {
   key: string;
   header: string;
   getRowPropContent: (value: any) => string;
+}
+
+export interface componentToId {
+  [key: string]: (input: any) => string;
 }

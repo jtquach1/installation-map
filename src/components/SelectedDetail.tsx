@@ -1,10 +1,10 @@
 import React from "react";
-import * as Config from "./Config";
-import * as Types from "./Types";
-import * as Functions from "./Functions";
+import * as Config from "../utils/Config";
+import * as Types from "../utils/Types";
+import { getDefaultRowColor } from "../utils/Renderers";
 
 const SelectedDetail = (props: Types.SelectedDetailProps): JSX.Element => {
-  const defaultRowColor = Functions.getDefaultRowColor(props.orderedIndex);
+  const defaultRowColor = getDefaultRowColor(props.orderedIndex);
   return (
     <thead>
       {Config.markerDetailMap.map((markerDetail, index) => {

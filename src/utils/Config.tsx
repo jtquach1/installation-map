@@ -37,11 +37,15 @@ export const geoUrl =
  */
 export const defaultCoordinates: Point = [0, 0];
 export const defaultRows: Types.row[] = [];
+export const defaultIndex: number = -1;
+export const defaultVisibility = undefined;
 export const defaultCombinedRows: Types.combinedRow[] = [];
 export const defaultTooltipContent: string = "";
 export const defaultCombinedRow: Types.combinedRow = {
   averageCoordinates: defaultCoordinates,
   rows: defaultRows,
+  index: defaultIndex,
+  isMarkerVisible: defaultVisibility,
 };
 export const defaultMousePosition: Types.position = {
   coordinates: defaultCoordinates,
@@ -82,7 +86,6 @@ export const markerDetailMap: Types.markerDetail[] = [
   {
     key: "coordinates",
     header: "Coordinates",
-
     getRowPropContent: (rowProp: Point) => {
       const [lng, lat] = rowProp;
       return `(${lng}, ${lat})`;
@@ -92,3 +95,8 @@ export const markerDetailMap: Types.markerDetail[] = [
 
 // Configuration for displaying sidebar table keys
 export const tableHeaderKeys = ["institution", "lab", "address"];
+
+// Configuration for certain React components to be passed a particular id.
+export const elementIds: Types.componentToId = {
+  Marker: (index: number) => `marker-${index}`,
+};

@@ -1,5 +1,5 @@
 import React from "react";
-import * as Types from "./Types";
+import * as Types from "../utils/Types";
 
 // "Place" From Material Design, Apache license version 2.0
 const PlaceIcon = (props: Types.PlaceIconProps): JSX.Element => {
