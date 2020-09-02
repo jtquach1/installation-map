@@ -158,14 +158,14 @@ const createCombinedRow = (
 };
 
 const getCombinedRowVisibility = (index: number): Types.Visibility => {
-  const elementId = getMarkerId(index);
+  const elementId = getMarkerIdentifier(index);
   const svgMarker = document.getElementById(elementId);
   const isMarkerVisible = elementIsInViewport(svgMarker);
   return isMarkerVisible;
 };
 
-export const getMarkerId = (index: number): string => {
-  return Config.elementIds.Marker(index);
+export const getMarkerIdentifier = (index: number): string => {
+  return Config.componentIds.Marker(index);
 };
 
 const elementIsInViewport = (element: HTMLElement | null): Types.Visibility => {

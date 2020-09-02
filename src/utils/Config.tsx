@@ -97,6 +97,6 @@ export const markerDetailMap: Types.markerDetail[] = [
 export const tableHeaderKeys = ["institution", "lab", "address"];
 
 // Configuration for certain React components to be passed a particular id.
-export const elementIds: Types.componentToId = {
+export const componentIds: Types.componentToIdentifier = {
   Marker: (index: number) => `marker-${index}`,
 };

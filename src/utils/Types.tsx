@@ -102,6 +102,6 @@ export interface markerDetail {
   getRowPropContent: (value: any) => string;
 }
 
-export interface componentToId {
+export interface componentToIdentifier {
   [key: string]: (input: any) => string;
 }

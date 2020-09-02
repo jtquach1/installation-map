@@ -174,7 +174,7 @@ export const createMarkerText = (
 
 export const createWaypointsTableHead = (keys: string[]): JSX.Element => {
   return (
-    <thead>
+    <thead id="waypoints-head">
       <tr>
         {keys.map((key: string, index: number) => (
           <th key={index} style={{ background: Config.tableHeaderColor }}>

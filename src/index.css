@@ -78,7 +78,7 @@ svg {
   overflow-y: auto;
   height: 20em;
 }
-.waypoints thead th {
+#waypoints thead th {
   position: sticky;
   top: 0;
 }

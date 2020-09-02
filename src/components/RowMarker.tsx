@@ -12,7 +12,7 @@ import {
   handleMarkerOnClick,
   handleMarkerOnMouse,
 } from "../utils/EventHandlers";
-import { getMarkerId } from "../utils/StateUpdaters";
+import { getMarkerIdentifier } from "../utils/StateUpdaters";
 import * as Types from "../utils/Types";
 
 const RowMarker = (props: Types.RowMarkerProps): JSX.Element => {
@@ -31,7 +31,7 @@ const RowMarker = (props: Types.RowMarkerProps): JSX.Element => {
       coordinates={givenRow.averageCoordinates}
       onMouseEnter={handleMarkerOnMouse(dispatch, combinedName)}
       onMouseLeave={handleMarkerOnMouse(dispatch)}
-      id={getMarkerId(givenRow.index)}
+      id={getMarkerIdentifier(givenRow.index)}
     >
       <PlaceIcon transform={mapMarkerTransform} markerColor={mapMarkerColor} />
       {zoomedInEnoughToDisplay && createMarkerText(combinedName, currentZoom)}
