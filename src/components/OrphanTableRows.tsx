@@ -2,6 +2,7 @@ import React from "react";
 import * as Types from "./../utils/Types";
 import { getTableRowColor } from "../utils/Renderers";
 import { handleMarkerOnClick } from "../utils/EventHandlers";
+import { getMarkerIdentifier } from "../utils/StateUpdaters";
 
 const OrphanTableRows = (props: Types.OrphanTableRowsProps): JSX.Element => {
   const [state, dispatch] = props.stateManager;
@@ -11,6 +12,7 @@ const OrphanTableRows = (props: Types.OrphanTableRowsProps): JSX.Element => {
     state.currentCombinedRow,
     props.givenIndex
   );
+  const markerIdentifier = getMarkerIdentifier(props.givenCombinedRow.index);
 
   /* React.Fragment allows for the return of orphan sibling elements without 
   adding an extra parent element to the DOM. The table rows need to be orphans 
@@ -22,6 +24,7 @@ const OrphanTableRows = (props: Types.OrphanTableRowsProps): JSX.Element => {
           key={row.index}
           onClick={handleMarkerOnClick(dispatch, props.givenCombinedRow)}
           style={{ background: combinedRowColor }}
+          className={markerIdentifier}
         >
           {props.keys.map((key, index) => {
             const keyIsValid = key in row;

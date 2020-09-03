@@ -1,5 +1,6 @@
 import * as Config from "./Config";
 import * as Types from "./Types";
+import { getMarkerIdentifier } from "./StateUpdaters";
 
 /////////////////
 // MapChart.tsx
@@ -78,4 +79,28 @@ export const handleMarkerOnClick = (
   givenRow: Types.combinedRow
 ) => (): void => {
   dispatch({ type: "setCurrentCombinedRow", value: givenRow });
+  handleWaypointsTableScrollbar(givenRow.index);
+};
+
+const handleWaypointsTableScrollbar = (rowIndex: number): void => {
+  const waypointsTable = document.getElementById("waypoints");
+  const firstRowOffset = getFirstRowOffset(rowIndex);
+  const tableHeadHeight = getTableHeadHeight();
+  if (!waypointsTable || !firstRowOffset || !tableHeadHeight) {
+  } else {
+    const newVerticalScrollPosition = firstRowOffset - tableHeadHeight;
+    waypointsTable.scrollTo(0, newVerticalScrollPosition);
+  }
+};
+
+const getTableHeadHeight = (): number | undefined => {
+  const waypointsTableHead = document.getElementById("waypoints-head");
+  return waypointsTableHead?.offsetHeight;
+};
+
+const getFirstRowOffset = (rowIndex: number): number | undefined => {
+  const markerIdentifier = getMarkerIdentifier(rowIndex);
+  const tableRows = document.getElementsByClassName(markerIdentifier);
+  const firstTableRow = tableRows[0] as HTMLElement | undefined;
+  return !firstTableRow ? undefined : firstTableRow.offsetTop;
 };

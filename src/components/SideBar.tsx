@@ -11,7 +11,7 @@ const SideBar = (props: Types.SideBarProps): JSX.Element => {
   return (
     <div className="left">
       <h1>Waypoints</h1>
-      <div className="tableFixHead waypoints">
+      <div className="tableFixHead" id="waypoints">
         <table>
           {createWaypointsTableHead(Config.tableHeaderKeys)}
           {createWaypointsTableBody(props.stateManager, Config.tableHeaderKeys)}
