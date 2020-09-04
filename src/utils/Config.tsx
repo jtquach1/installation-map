@@ -51,12 +51,17 @@ export const defaultMousePosition: Types.position = {
   coordinates: defaultCoordinates,
   zoom: minZoom,
 };
+export const defaultSearchBarContent: string = "";
+export const defaultToggle: boolean = false;
 export const defaultState: Types.state = {
   rows: defaultRows,
   combinedRows: defaultCombinedRows,
   tooltipContent: defaultTooltipContent,
   currentCombinedRow: defaultCombinedRow,
   mousePosition: defaultMousePosition,
+  searchBarContent: defaultSearchBarContent,
+  useMarkerVisibility: defaultToggle,
+  useSearchBar: defaultToggle,
 };
 
 /**
@@ -100,3 +105,4 @@ export const tableHeaderKeys = ["institution", "lab", "address"];
 export const componentIds: Types.componentToIdentifier = {
   Marker: (index: number) => `marker-${index}`,
 };
+export const mapContainerName = "container";

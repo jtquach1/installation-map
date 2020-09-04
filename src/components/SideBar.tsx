@@ -6,6 +6,7 @@ import {
   createWaypointsTableBody,
   createWaypointDetails,
 } from "../utils/Renderers";
+import FilterOptions from "./FilterOptions";
 
 const SideBar = (props: Types.SideBarProps): JSX.Element => {
   return (
@@ -17,6 +18,7 @@ const SideBar = (props: Types.SideBarProps): JSX.Element => {
           {createWaypointsTableBody(props.stateManager, Config.tableHeaderKeys)}
         </table>
       </div>
+      <FilterOptions stateManager={props.stateManager} />
       <h1>Selected waypoint details</h1>
       <div className="tableFixHead waypoint-details">
         <table>{createWaypointDetails(props.stateManager)}</table>

@@ -11,7 +11,8 @@ export type StateProp =
   | string
   | combinedRow
   | position
-  | number;
+  | number
+  | boolean;
 
 export interface row {
   institution: string;
@@ -39,6 +40,10 @@ export interface position {
 }
 
 export interface SideBarProps {
+  stateManager: stateManager;
+}
+
+export interface FilterOptionsProps {
   stateManager: stateManager;
 }
 
@@ -84,6 +89,9 @@ export interface state {
   tooltipContent: string;
   currentCombinedRow: combinedRow;
   mousePosition: position;
+  searchBarContent: string;
+  useMarkerVisibility: boolean;
+  useSearchBar: boolean;
 }
 
 export interface action {

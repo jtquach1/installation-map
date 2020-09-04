@@ -34,6 +34,12 @@ export const reducer = (
         currentCombinedRow: Config.defaultCombinedRow,
         mousePosition: action.value as Types.position,
       };
+    case "setSearchBarContent":
+      return { ...state, searchBarContent: action.value as string };
+    case "toggleVisibility":
+      return { ...state, useMarkerVisibility: action.value as boolean };
+    case "toggleSearchBarQuery":
+      return { ...state, useSearchBar: action.value as boolean };
     default:
       return state;
   }
@@ -170,7 +176,7 @@ export const getMarkerIdentifier = (index: number): string => {
 
 const elementIsInViewport = (element: HTMLElement | null): Types.Visibility => {
   const rectangle = element?.getBoundingClientRect();
-  const container = document.getElementById("container");
+  const container = document.getElementById(Config.mapContainerName);
   const elementNotValid = !element || 1 !== element.nodeType;
   if (elementNotValid || !rectangle || !container) {
     return undefined;
