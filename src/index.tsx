@@ -3,15 +3,14 @@ import ReactDOM from "react-dom";
 import ReactTooltip from "react-tooltip";
 import MapChart from "./components/MapChart";
 import SideBar from "./components/SideBar";
-import { reducer, getUpdatedCombinedRowsByZoom } from "./utils/StateUpdaters";
 import * as Config from "./utils/Config";
+import * as Renderers from "./utils/Renderers";
+import * as StateUpdaters from "./utils/StateUpdaters";
 import "./index.css";
 
 const App = (): JSX.Element => {
-  const stateManager = useReducer(reducer, Config.defaultState);
+  const stateManager = useReducer(StateUpdaters.reducer, Config.defaultState);
   const [state, dispatch] = stateManager;
-  const { rows, combinedRows, mousePosition } = state;
-  const { zoom, coordinates } = mousePosition;
 
   // Promise to get markers for served build
   useEffect(() => {
@@ -23,25 +22,53 @@ const App = (): JSX.Element => {
     fetchMarkers();
   }, [dispatch]);
 
-  /**
-   * Only rerenders when current combinedRows differs from previous.
-   */
+  // Only rerenders when current combinedRows differs from previous.
   useEffect(() => {
     dispatch({
       type: "updateCombinedRows",
-      value: getUpdatedCombinedRowsByZoom(rows, combinedRows, zoom),
+      value: StateUpdaters.getUpdatedCombinedRowsByZoom(
+        state.rows,
+        state.combinedRows,
+        state.mousePosition.zoom
+      ),
     });
-  }, [dispatch, rows, combinedRows, zoom, coordinates]);
+  }, [
+    dispatch,
+    state.rows,
+    state.combinedRows,
+    state.mousePosition.zoom,
+    state.mousePosition.coordinates,
+  ]);
 
-  console.log("state.tooltipContent", state.tooltipContent);
+  // Display configuration for cBioPortal sidebar vs. full standalone page
+  useEffect(() => {
+    dispatch({
+      type: "setInFullMode",
+      value: StateUpdaters.checkInFullMode(),
+    });
+  }, [dispatch]);
 
-  return (
-    <div id="wrapper">
-      <SideBar stateManager={stateManager} />
-      <MapChart stateManager={stateManager} />
-      <ReactTooltip>{state.tooltipContent}</ReactTooltip>
-    </div>
-  );
+  const fullModeRender = (): JSX.Element => {
+    Renderers.setRootElementWidth(Config.fullWidth);
+    return (
+      <div id="wrapper">
+        <SideBar stateManager={stateManager} width="30%" />
+        <MapChart stateManager={stateManager} width="70%" />
+        <ReactTooltip>{state.tooltipContent}</ReactTooltip>
+      </div>
+    );
+  };
+
+  const smallModeRender = (): JSX.Element => {
+    Renderers.setRootElementWidth(Config.smallWidth);
+    return (
+      <div id="wrapper">
+        <MapChart stateManager={stateManager} width="100%" />
+      </div>
+    );
+  };
+
+  return state.inFullMode ? fullModeRender() : smallModeRender();
 };
 
 const rootElement = document.getElementById("root");
