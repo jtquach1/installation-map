@@ -10,6 +10,10 @@ import * as Types from "./Types";
 // MapChart.tsx
 /////////////////
 
+export const handleDimensions = (inFullMode: boolean): Types.Dimensions => {
+  return inFullMode ? Config.fullModeDimensions : Config.smallModeDimensions;
+};
+
 export const createGeographies = (
   stateManager: Types.stateManager
 ): JSX.Element => {
@@ -299,4 +303,15 @@ export const getTableRowColor = (
 export const getDefaultRowColor = (rowIndex: number): string => {
   const rowIsEven = rowIndex % 2 === 0;
   return rowIsEven ? Config.evenRowColor : Config.oddRowColor;
+};
+
+//////////////
+// index.tsx
+//////////////
+
+export const setRootElementWidth = (value: string) => {
+  const rootElement = document.getElementById("root");
+  if (!!rootElement) {
+    rootElement.style.width = value;
+  }
 };

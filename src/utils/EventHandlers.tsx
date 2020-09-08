@@ -1,6 +1,6 @@
 import * as Config from "./Config";
 import * as Types from "./Types";
-import { getMarkerIdentifier } from "./StateUpdaters";
+import * as StateUpdaters from "./StateUpdaters";
 
 /////////////////
 // MapChart.tsx
@@ -99,7 +99,7 @@ const getTableHeadHeight = (): number | undefined => {
 };
 
 const getFirstRowOffset = (rowIndex: number): number | undefined => {
-  const markerIdentifier = getMarkerIdentifier(rowIndex);
+  const markerIdentifier = StateUpdaters.getMarkerIdentifier(rowIndex);
   const tableRows = document.getElementsByClassName(markerIdentifier);
   const firstTableRow = tableRows[0] as HTMLElement | undefined;
   return !firstTableRow ? undefined : firstTableRow.offsetTop;

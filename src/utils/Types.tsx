@@ -5,6 +5,14 @@ export type CombinedProp = Point | row[] | number | Visibility;
 export type Dispatch = React.Dispatch<action>;
 export type ZoomHandler = (zoom: number) => void;
 export type Visibility = boolean | undefined;
+export type Parameters = {
+  [key: string]: string | undefined;
+};
+export type Dimensions = {
+  width: number;
+  height: number;
+  scale: number;
+};
 export type StateProp =
   | row[]
   | combinedRow[]
@@ -41,6 +49,7 @@ export interface position {
 
 export interface SideBarProps {
   stateManager: stateManager;
+  width: string;
 }
 
 export interface FilterOptionsProps {
@@ -67,6 +76,7 @@ export interface SelectedDetailRowProps {
 
 export interface MapChartProps {
   stateManager: stateManager;
+  width: string;
 }
 
 export interface ZoomControlProps {
@@ -92,6 +102,7 @@ export interface state {
   searchBarContent: string;
   useMarkerVisibility: boolean;
   useSearchBar: boolean;
+  inFullMode: boolean;
 }
 
 export interface action {

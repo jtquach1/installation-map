@@ -21,6 +21,9 @@ export const minZoom = 1;
 export const oddRowColor = "#f6f6f6";
 export const tableHeaderColor = "#dcdcdc";
 export const zoomMultiplier = 2;
+export const urlQuery: RegExp = /\?/i;
+export const fullWidth = "unset";
+export const smallWidth = "342px";
 
 /**
  * World map JSON Url:
@@ -62,6 +65,7 @@ export const defaultState: Types.state = {
   searchBarContent: defaultSearchBarContent,
   useMarkerVisibility: defaultToggle,
   useSearchBar: defaultToggle,
+  inFullMode: defaultToggle,
 };
 
 /**
@@ -106,3 +110,16 @@ export const componentIds: Types.componentToIdentifier = {
   Marker: (index: number) => `marker-${index}`,
 };
 export const mapContainerName = "container";
+
+// Configuration for rendering MapChart.
+export const fullModeDimensions = {
+  width: 800,
+  height: 550,
+  scale: 200,
+};
+
+export const smallModeDimensions = {
+  width: 600,
+  height: 400,
+  scale: 100,
+};

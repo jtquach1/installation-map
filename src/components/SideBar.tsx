@@ -10,7 +10,7 @@ import FilterOptions from "./FilterOptions";
 
 const SideBar = (props: Types.SideBarProps): JSX.Element => {
   return (
-    <div className="left">
+    <div className="left" style={{ width: props.width }}>
       <h1>Waypoints</h1>
       <div className="tableFixHead" id="waypoints">
         <table>

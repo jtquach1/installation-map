@@ -40,6 +40,8 @@ export const reducer = (
       return { ...state, useMarkerVisibility: action.value as boolean };
     case "toggleSearchBarQuery":
       return { ...state, useSearchBar: action.value as boolean };
+    case "setInFullMode":
+      return { ...state, inFullMode: action.value as boolean };
     default:
       return state;
   }
@@ -187,4 +189,23 @@ const elementIsInViewport = (element: HTMLElement | null): Types.Visibility => {
     const withinHorizontalBounds = right >= 0 && left < clientWidth;
     return withinVerticalBounds && withinHorizontalBounds;
   }
+};
+
+export const checkInFullMode = (): boolean => {
+  const parameters = getWindowUrlParameters();
+  return !parameters.small;
+};
+
+const getWindowUrlParameters = (): Types.Parameters => {
+  const windowUrl = window.location.href;
+  const queryLocation = windowUrl.search(Config.urlQuery) + 1;
+  const query = windowUrl.slice(queryLocation);
+  const parameters = query
+    .split("&")
+    .map((assignment) => assignment.split("="))
+    .reduce((variable, value) => {
+      variable[value[0]] = value[1];
+      return variable;
+    }, {} as any);
+  return parameters;
 };
