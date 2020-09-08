@@ -1,5 +1,6 @@
 import { Point } from "react-simple-maps";
 import * as Types from "./Types";
+import * as StateUpdaters from "./StateUpdaters";
 
 /**
  * Constants
@@ -13,17 +14,18 @@ export const baseStrokeThickness = 1;
 export const baseTranslateOffset = 12;
 export const baseZoomThreshold = 16;
 export const defaultMarkerColor = "#3786C2";
-export const evenRowColor = "#ededed";
 export const highlightedMarkerColor = "#8bc5f1";
-export const highlightedRowColor = "#c3e3fb";
 export const maxZoom = 128;
 export const minZoom = 1;
-export const oddRowColor = "#f6f6f6";
-export const tableHeaderColor = "#dcdcdc";
 export const zoomMultiplier = 2;
+export const zoomForFullName = 64;
 export const urlQuery: RegExp = /\?/i;
 export const fullWidth = "unset";
 export const smallWidth = "342px";
+export const mapContainerName = "container";
+export const rootContainerName = "root";
+export const enableHighlight = "highlighted";
+export const disableHighlight = "";
 
 /**
  * World map JSON Url:
@@ -38,40 +40,50 @@ export const geoUrl =
 /**
  * Default values
  */
-export const defaultCoordinates: Point = [0, 0];
-export const defaultRows: Types.row[] = [];
-export const defaultIndex: number = -1;
-export const defaultVisibility = undefined;
-export const defaultCombinedRows: Types.combinedRow[] = [];
+const defaultCoordinates: Point = [0, 0];
+const defaultRows: Types.Row[] = [];
+const defaultIndex: number = -1;
+const defaultVisibility = undefined;
+export const defaultCombinedRows: Types.CombinedRow[] = [];
 export const defaultTooltipContent: string = "";
-export const defaultCombinedRow: Types.combinedRow = {
+export const defaultCombinedRow: Types.CombinedRow = {
   averageCoordinates: defaultCoordinates,
   rows: defaultRows,
   index: defaultIndex,
   isMarkerVisible: defaultVisibility,
 };
-export const defaultMousePosition: Types.position = {
+const defaultMousePosition: Types.Position = {
   coordinates: defaultCoordinates,
   zoom: minZoom,
 };
 export const defaultSearchBarContent: string = "";
-export const defaultToggle: boolean = false;
-export const defaultState: Types.state = {
+const defaultToggle: boolean = false;
+const defaultMode: boolean = StateUpdaters.checkInFullMode();
+export const defaultRow: Types.Row = {
+  institution: "",
+  category: "",
+  lab: "",
+  address: "",
+  coordinates: [0, 0],
+  index: -1,
+};
+export const defaultState: Types.State = {
   rows: defaultRows,
-  combinedRows: defaultCombinedRows,
+  allCombinedRows: defaultCombinedRows,
   tooltipContent: defaultTooltipContent,
-  currentCombinedRow: defaultCombinedRow,
+  currentCombinedRows: defaultCombinedRows,
   mousePosition: defaultMousePosition,
   searchBarContent: defaultSearchBarContent,
   useMarkerVisibility: defaultToggle,
   useSearchBar: defaultToggle,
-  inFullMode: defaultToggle,
+  inFullMode: defaultMode,
+  currentRow: defaultRow,
 };
 
 /**
  * Configuration for mapping JSON keys to table row header and data cells.
  */
-export const markerDetailMap: Types.markerDetail[] = [
+export const markerDetailMap: Types.MarkerDetail[] = [
   {
     key: "institution",
     header: "Institution or Company Name",
@@ -109,7 +121,6 @@ export const tableHeaderKeys = ["institution", "lab", "address"];
 export const componentIds: Types.componentToIdentifier = {
   Marker: (index: number) => `marker-${index}`,
 };
-export const mapContainerName = "container";
 
 // Configuration for rendering MapChart.
 export const fullModeDimensions = {

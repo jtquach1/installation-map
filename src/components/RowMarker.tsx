@@ -1,40 +1,41 @@
 import React from "react";
 import PlaceIcon from "./PlaceIcon";
 import { Marker } from "react-simple-maps";
-import {
-  getCombinedName,
-  displayOnLargeZoom,
-  handleMarkerTransform,
-  getMapMarkerColor,
-  createMarkerText,
-} from "../utils/Renderers";
-import {
-  handleMarkerOnClick,
-  handleMarkerOnMouse,
-} from "../utils/EventHandlers";
-import { getMarkerIdentifier } from "../utils/StateUpdaters";
+import * as Config from "../utils/Config";
+import * as EventHandlers from "../utils/EventHandlers";
+import * as Renderers from "../utils/Renderers";
+import * as StateUpdaters from "../utils/StateUpdaters";
 import * as Types from "../utils/Types";
 
 const RowMarker = (props: Types.RowMarkerProps): JSX.Element => {
   const [state, dispatch] = props.stateManager;
   const currentZoom = state.mousePosition.zoom;
   const givenRow = props.givenCombinedRow;
-  const currentRow = state.currentCombinedRow;
-  const combinedName = getCombinedName(givenRow);
-  const zoomedInEnoughToDisplay = displayOnLargeZoom(currentZoom);
-  const mapMarkerTransform = handleMarkerTransform(currentZoom);
-  const mapMarkerColor = getMapMarkerColor(givenRow, currentRow);
+  const currentRows = state.currentCombinedRows;
+  const combinedName = Renderers.getCombinedName(givenRow);
+  const zoomedInEnoughToDisplay = Renderers.displayOnLargeZoom(currentZoom);
+  const mapMarkerTransform = Renderers.handleMarkerTransform(currentZoom);
+  const mapMarkerColor = Renderers.getMapMarkerColor(givenRow, currentRows);
 
   return (
     <Marker
-      onClick={handleMarkerOnClick(dispatch, givenRow)}
+      onClick={EventHandlers.handleMarkerOnClick(
+        dispatch,
+        givenRow,
+        Config.defaultRow
+      )}
       coordinates={givenRow.averageCoordinates}
-      onMouseEnter={handleMarkerOnMouse(dispatch, combinedName)}
-      onMouseLeave={handleMarkerOnMouse(dispatch)}
-      id={getMarkerIdentifier(givenRow.index)}
+      onMouseEnter={EventHandlers.handleMarkerOnMouse(dispatch, combinedName)}
+      onMouseLeave={EventHandlers.handleMarkerOnMouse(dispatch)}
+      id={StateUpdaters.getMarkerIdentifier(givenRow.index)}
     >
       <PlaceIcon transform={mapMarkerTransform} markerColor={mapMarkerColor} />
-      {zoomedInEnoughToDisplay && createMarkerText(combinedName, currentZoom)}
+      {zoomedInEnoughToDisplay &&
+        Renderers.createMarkerText(
+          combinedName,
+          givenRow.rows.length,
+          currentZoom
+        )}
     </Marker>
   );
 };

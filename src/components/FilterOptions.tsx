@@ -2,7 +2,7 @@ import React from "react";
 import * as EventHandlers from "../utils/EventHandlers";
 import * as Types from "../utils/Types";
 
-const FilterOptions = (props: Types.FilterOptionsProps) => {
+const FilterOptions = (props: Types.FilterOptionsProps): JSX.Element => {
   const [state] = props.stateManager;
   return (
     <div className="filter-options">
@@ -22,7 +22,7 @@ const FilterOptions = (props: Types.FilterOptionsProps) => {
       <form className="visibility">
         <input
           type="checkbox"
-          onClick={EventHandlers.handleVisibilityToggle(props.stateManager)}
+          onChange={EventHandlers.handleVisibilityToggle(props.stateManager)}
           checked={state.useMarkerVisibility}
         />
         <label>Filter table by visibility</label>

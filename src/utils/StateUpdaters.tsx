@@ -1,5 +1,7 @@
 import { Point } from "react-simple-maps";
 import * as Config from "./Config";
+import * as EventHandlers from "./EventHandlers";
+import * as Renderers from "./Renderers";
 import * as Types from "./Types";
 
 //////////////
@@ -7,73 +9,171 @@ import * as Types from "./Types";
 //////////////
 
 export const reducer = (
-  state: Types.state,
-  action: Types.action
-): Types.state => {
+  state: Types.State,
+  action: Types.Action
+): Types.State => {
   switch (action.type) {
     case "setRows":
-      return { ...state, rows: action.value as Types.row[] };
-    case "updateCombinedRows":
+      return { ...state, rows: action.value as Types.Row[] };
+    case "setAllCombinedRows":
       return {
         ...state,
-        combinedRows: action.value as Types.combinedRow[],
+        allCombinedRows: action.value as Types.CombinedRow[],
       };
     case "setTooltipContent":
       return { ...state, tooltipContent: action.value as string };
-    case "setCurrentCombinedRow":
+    case "setCurrentCombinedRows":
       return {
         ...state,
-        currentCombinedRow: action.value as Types.combinedRow,
+        currentCombinedRows: action.value as Types.CombinedRow[],
       };
     case "setMousePosition":
-      return { ...state, mousePosition: action.value as Types.position };
-    case "updateMousePositionAndRefreshMarkers":
-      return {
-        ...state,
-        combinedRows: Config.defaultCombinedRows,
-        currentCombinedRow: Config.defaultCombinedRow,
-        mousePosition: action.value as Types.position,
-      };
+      return { ...state, mousePosition: action.value as Types.Position };
     case "setSearchBarContent":
       return { ...state, searchBarContent: action.value as string };
     case "toggleVisibility":
       return { ...state, useMarkerVisibility: action.value as boolean };
     case "toggleSearchBarQuery":
       return { ...state, useSearchBar: action.value as boolean };
-    case "setInFullMode":
-      return { ...state, inFullMode: action.value as boolean };
+    case "setCurrentRow":
+      return { ...state, currentRow: action.value as Types.Row };
     default:
       return state;
   }
 };
 
-export const getUpdatedCombinedRowsByZoom = (
-  rows: Types.row[],
-  combinedRows: Types.combinedRow[],
+export const getJsonMarkers = (
+  dispatch: Types.Dispatch
+): React.EffectCallback => {
+  return () => {
+    const fetchMarkers = async (): Promise<void> => {
+      const response: Response = await fetch("/static/waypoints.json");
+      const markers: Types.Row[] = await response.json();
+      dispatch({ type: "setRows", value: markers });
+    };
+    fetchMarkers();
+  };
+};
+
+export const updateAllAndCurrentCombinedRows = (
+  stateManager: Types.StateManager
+): React.EffectCallback => {
+  const [state, dispatch] = stateManager;
+  return () => {
+    const updatedCombinedRows = getUpdatedCombinedRowsByZoom(
+      state.rows,
+      Config.defaultCombinedRows,
+      state.mousePosition.zoom
+    );
+    const updatedCurrentCombinedRows = getUpdatedCurrentCombinedRows(
+      updatedCombinedRows,
+      state.currentCombinedRows
+    );
+    scrollToEarliestCurrentRow(updatedCurrentCombinedRows, updatedCombinedRows);
+    dispatch({
+      type: "setAllCombinedRows",
+      value: updatedCombinedRows,
+    });
+    dispatch({
+      type: "setCurrentCombinedRows",
+      value: updatedCurrentCombinedRows,
+    });
+  };
+};
+
+const getUpdatedCurrentCombinedRows = (
+  allCombinedRows: Types.CombinedRow[],
+  currentCombinedRows: Types.CombinedRow[]
+): Types.CombinedRow[] => {
+  const childRows = Renderers.getFlattenedChildRows(currentCombinedRows);
+  const parentCombinedRows = childRows.map(findExistingParent(allCombinedRows));
+  const uniqueParents = parentCombinedRows.filter(firstInstanceOfCombinedRow);
+  return uniqueParents;
+};
+
+const findExistingParent = (combinedRows: Types.CombinedRow[]) => (
+  row: Types.Row
+): Types.CombinedRow => {
+  const existingParent = combinedRows.find(parentContainsGivenRow(row));
+  return !existingParent ? Config.defaultCombinedRow : existingParent;
+};
+
+const parentContainsGivenRow = (givenRow: Types.Row) => (
+  parentCombinedRow: Types.CombinedRow
+): Types.Row | undefined => {
+  return parentCombinedRow.rows.find((row) => row === givenRow);
+};
+
+const firstInstanceOfCombinedRow = (
+  givenRow: Types.CombinedRow,
+  index: number,
+  parentRows: Types.CombinedRow[]
+): boolean => {
+  return parentRows.indexOf(givenRow) === index;
+};
+
+const scrollToEarliestCurrentRow = (
+  currentRows: Types.CombinedRow[],
+  allRows: Types.CombinedRow[]
+): void => {
+  const earliestRow = getEarliestCombinedRow(currentRows, allRows);
+  if (!!earliestRow) {
+    const multipleRowIndex = 0;
+    EventHandlers.handleWaypointsTableScrollbar(
+      earliestRow.index,
+      multipleRowIndex
+    );
+  }
+};
+
+const getEarliestCombinedRow = (
+  currentRows: Types.CombinedRow[],
+  allRows: Types.CombinedRow[]
+): Types.CombinedRow | undefined => {
+  const defaultIndex = allRows.length;
+  const earliestIndex = currentRows.reduce(getEarliestIndexSoFar, defaultIndex);
+  const earliestCombinedRow = currentRows.find(
+    (currentRow) => currentRow.index === earliestIndex
+  );
+  return earliestCombinedRow;
+};
+
+const getEarliestIndexSoFar = (
+  earliestIndexSoFar: number,
+  currentRow: Types.CombinedRow
+): number => {
+  return currentRow.index <= earliestIndexSoFar
+    ? currentRow.index
+    : earliestIndexSoFar;
+};
+
+const getUpdatedCombinedRowsByZoom = (
+  rows: Types.Row[],
+  allCombinedRows: Types.CombinedRow[],
   zoom: number
-): Types.combinedRow[] => {
-  return rows.reduce(collectNearbyRowsByZoom(zoom), combinedRows);
+): Types.CombinedRow[] => {
+  return rows.reduce(collectNearbyRowsByZoom(zoom), allCombinedRows);
 };
 
 const collectNearbyRowsByZoom = (zoom: number) => (
-  combinedRows: Types.combinedRow[],
-  givenRow: Types.row
-): Types.combinedRow[] => {
-  const markerCoordinates = givenRow.coordinates;
+  allRows: Types.CombinedRow[],
+  givenRow: Types.Row
+): Types.CombinedRow[] => {
+  const givenCoordinates = givenRow.coordinates;
   const maxRadius = Config.baseRadius / zoom;
   const parentIndex = findParentCombinedRowIndex(
-    combinedRows,
-    markerCoordinates,
+    allRows,
+    givenCoordinates,
     maxRadius
   );
   const parentExists = parentIndex !== -1;
-  const parentCombinedRow = combinedRows[parentIndex];
+  const parentCombinedRow = allRows[parentIndex];
 
   if (parentExists) {
     const siblingRows = parentCombinedRow.rows;
     const newCoordinates = computeAverageCoordinates(siblingRows, givenRow);
     const newRows = updateExistingRows(siblingRows, givenRow);
-    combinedRows[parentIndex] = createCombinedRow(
+    allRows[parentIndex] = createCombinedRow(
       newCoordinates,
       newRows,
       parentIndex
@@ -81,21 +181,21 @@ const collectNearbyRowsByZoom = (zoom: number) => (
   } else {
     const newCoordinates = givenRow.coordinates;
     const newRows = [givenRow];
-    const newParentIndex = combinedRows.length;
-    combinedRows = [
-      ...combinedRows,
+    const newParentIndex = allRows.length;
+    allRows = [
+      ...allRows,
       createCombinedRow(newCoordinates, newRows, newParentIndex),
     ];
   }
-  return combinedRows;
+  return allRows;
 };
 
 const findParentCombinedRowIndex = (
-  combinedRows: Types.combinedRow[],
+  allRows: Types.CombinedRow[],
   givenCoordinates: Point,
   maxRadius: number
 ): number => {
-  return combinedRows.findIndex((parentCombinedRow) => {
+  return allRows.findIndex((parentCombinedRow) => {
     const parentCoordinates = parentCombinedRow.averageCoordinates;
     return areCoordinatesWithinRange(
       parentCoordinates,
@@ -122,8 +222,8 @@ const areCoordinatesWithinRange = (
 };
 
 const computeAverageCoordinates = (
-  siblingRows: Types.row[],
-  currentRow: Types.row
+  siblingRows: Types.Row[],
+  currentRow: Types.Row
 ): Point => {
   const totalPoint = siblingRows.reduce(pointReducer, currentRow.coordinates);
   const [totalLng, totalLat] = totalPoint;
@@ -135,7 +235,7 @@ const computeAverageCoordinates = (
 
 const pointReducer = (
   runningTotalPoint: Point,
-  currentRow: Types.row
+  currentRow: Types.Row
 ): Point => {
   const [accumulatedLng, accumulatedLat] = runningTotalPoint;
   const [currentLng, currentLat] = currentRow.coordinates;
@@ -145,18 +245,18 @@ const pointReducer = (
 };
 
 const updateExistingRows = (
-  siblingRows: Types.row[],
-  givenRow: Types.row
-): Types.row[] => {
+  siblingRows: Types.Row[],
+  givenRow: Types.Row
+): Types.Row[] => {
   const givenRowExistsInRows = siblingRows.some((row) => row === givenRow);
   return givenRowExistsInRows ? siblingRows : [...siblingRows, givenRow];
 };
 
 const createCombinedRow = (
   averageCoordinates: Point,
-  rows: Types.row[],
+  rows: Types.Row[],
   index: number
-): Types.combinedRow => {
+): Types.CombinedRow => {
   return {
     averageCoordinates: averageCoordinates,
     rows: rows,
@@ -172,24 +272,49 @@ const getCombinedRowVisibility = (index: number): Types.Visibility => {
   return isMarkerVisible;
 };
 
+const elementIsInViewport = (element: HTMLElement | null): Types.Visibility => {
+  const rectangle = element?.getBoundingClientRect();
+  const mapContainer = document.getElementById(Config.mapContainerName);
+  const rootContainer = document.getElementById(Config.rootContainerName);
+  const elementNotValid = !element || 1 !== element.nodeType;
+  if (elementNotValid || !rectangle || !mapContainer || !rootContainer) {
+    return undefined;
+  } else {
+    const limits = getViewportLimits(rootContainer, mapContainer);
+    const withinVerticalBounds =
+      rectangle.bottom >= limits.bottom && rectangle.top < limits.top;
+    const withinHorizontalBounds =
+      rectangle.right >= limits.right && rectangle.left < limits.left;
+    return withinVerticalBounds && withinHorizontalBounds;
+  }
+};
+
+const getViewportLimits = (
+  rootContainer: HTMLElement,
+  mapContainer: HTMLElement
+): Types.Limits => {
+  const rootHeight = rootContainer.clientHeight;
+  const mapHeight = mapContainer.clientHeight;
+  const rootWidth = rootContainer.clientWidth;
+  const mapWidth = mapContainer.clientWidth;
+  const top = rootHeight;
+  const bottom = rootHeight - mapHeight;
+  const right = rootWidth - mapWidth;
+  const left = rootWidth;
+  return { top, right, bottom, left };
+};
+
+//////////////////
+// RowMarker.tsx
+//////////////////
+
 export const getMarkerIdentifier = (index: number): string => {
   return Config.componentIds.Marker(index);
 };
 
-const elementIsInViewport = (element: HTMLElement | null): Types.Visibility => {
-  const rectangle = element?.getBoundingClientRect();
-  const container = document.getElementById(Config.mapContainerName);
-  const elementNotValid = !element || 1 !== element.nodeType;
-  if (elementNotValid || !rectangle || !container) {
-    return undefined;
-  } else {
-    const { clientHeight, clientWidth } = container;
-    const { top, right, bottom, left } = rectangle;
-    const withinVerticalBounds = bottom >= 0 && top < clientHeight;
-    const withinHorizontalBounds = right >= 0 && left < clientWidth;
-    return withinVerticalBounds && withinHorizontalBounds;
-  }
-};
+///////////////
+// Config.tsx
+///////////////
 
 export const checkInFullMode = (): boolean => {
   const parameters = getWindowUrlParameters();
@@ -206,6 +331,6 @@ const getWindowUrlParameters = (): Types.Parameters => {
     .reduce((variable, value) => {
       variable[value[0]] = value[1];
       return variable;
-    }, {} as any);
+    }, {} as Types.Parameters);
   return parameters;
 };
