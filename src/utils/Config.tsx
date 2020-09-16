@@ -20,10 +20,10 @@ export const minZoom = 1;
 export const zoomMultiplier = 2;
 export const zoomForFullName = 64;
 export const urlQuery: RegExp = /\?/i;
-export const fullWidth = "unset";
-export const smallWidth = "342px";
 export const mapContainerName = "container";
 export const rootContainerName = "root";
+export const scrollableTableName = "tableFixHead";
+export const waypointsHeadName = "waypoints-head";
 export const enableHighlight = "highlighted";
 export const disableHighlight = "";
 
@@ -45,7 +45,6 @@ const defaultRows: Types.Row[] = [];
 const defaultIndex: number = -1;
 const defaultVisibility = undefined;
 export const defaultCombinedRows: Types.CombinedRow[] = [];
-export const defaultTooltipContent: string = "";
 export const defaultCombinedRow: Types.CombinedRow = {
   averageCoordinates: defaultCoordinates,
   rows: defaultRows,
@@ -70,7 +69,6 @@ export const defaultRow: Types.Row = {
 export const defaultState: Types.State = {
   rows: defaultRows,
   allCombinedRows: defaultCombinedRows,
-  tooltipContent: defaultTooltipContent,
   currentCombinedRows: defaultCombinedRows,
   mousePosition: defaultMousePosition,
   searchBarContent: defaultSearchBarContent,

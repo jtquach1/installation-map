@@ -13,7 +13,7 @@ const MapChart = (props: Types.MapChartProps): JSX.Element => {
   const fullModeRender = (): JSX.Element => {
     return (
       <div className="mapchart" style={{ width: props.width }}>
-        <ZoomControls stateManager={props.stateManager} />
+        <ZoomControls stateManager={props.stateManager} width={props.width} />
         <ComposableMap
           id={Config.mapContainerName}
           width={dimensions.width}

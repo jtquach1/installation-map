@@ -229,21 +229,39 @@ export const createMarkerText = (
   numberOfRows: number,
   zoom: number
 ): JSX.Element => {
-  const mapMarkerOffset = handleMarkerOffset(zoom);
-  const mapMarkerFontSize = handleMarkerFontSize(zoom);
+  const offsetFromMarker = handleMarkerOffset(zoom);
+  const nameFontSize = handleMarkerFontSize(zoom);
   const displayedPair = getDisplayedPair(zoom, numberOfRows, combinedName);
   const displayedName = displayedPair.name;
   const displayedStyle = displayedPair.fontStyle;
-
   return (
     <text
       textAnchor="middle"
-      y={mapMarkerOffset}
-      style={{ fontSize: mapMarkerFontSize, fontStyle: displayedStyle }}
+      y={offsetFromMarker}
+      style={{ fontStyle: displayedStyle }}
     >
-      {displayedName}
+      <tspan x="0" style={{ fontSize: nameFontSize }}>
+        {displayedName}
+      </tspan>
+      {displaySubtitle(displayedName, nameFontSize)}
     </text>
   );
+};
+
+const displaySubtitle = (
+  displayedName: string,
+  nameFontSize: number
+): JSX.Element | null => {
+  const showsNumberOfInstallations = displayedName
+    .toLocaleLowerCase()
+    .includes("installations");
+  const subtitleMultiplier = 0.8;
+  const subtitleFontSize = subtitleMultiplier * nameFontSize;
+  return showsNumberOfInstallations ? (
+    <tspan x="0" dy="1.2em" style={{ fontSize: subtitleFontSize }}>
+      Click for details
+    </tspan>
+  ) : null;
 };
 
 const getDisplayedPair = (
@@ -256,7 +274,7 @@ const getDisplayedPair = (
   if (canDisplayFullName) {
     return { name: combinedName, fontStyle: "normal" };
   } else if (existsMoreThanOneRow) {
-    const truncatedName = `${numberOfRows} installations`;
+    const truncatedName = `${numberOfRows} Installations`;
     return { name: truncatedName, fontStyle: "italic" };
   } else {
     const truncatedName = getTruncatedName(zoom, combinedName);
@@ -361,13 +379,13 @@ const createOrphanTableRows = (
 
 export const createWaypointDetails = (
   stateManager: Types.StateManager
-): JSX.Element[] => {
+): JSX.Element => {
   const [state] = stateManager;
   const shouldDisplaySingleRow = state.currentRow !== Config.defaultRow;
   const rows = shouldDisplaySingleRow
     ? [state.currentRow]
     : getFlattenedChildRows(state.currentCombinedRows);
-  return rows.map(createSelectedDetail);
+  return <thead>{rows.map(createSelectedDetail)}</thead>;
 };
 
 export const getFlattenedChildRows = (
@@ -408,15 +426,4 @@ export const handleHighlight = (
 
 export const rowIsDefault = (givenRow: Types.Row): boolean => {
   return givenRow === Config.defaultRow;
-};
-
-//////////////
-// index.tsx
-//////////////
-
-export const setRootElementWidth = (value: string): void => {
-  const rootElement = document.getElementById(Config.rootContainerName);
-  if (!!rootElement) {
-    rootElement.style.width = value;
-  }
 };

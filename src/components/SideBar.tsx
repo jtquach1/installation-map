@@ -1,27 +1,30 @@
 import React from "react";
 import * as Config from "../utils/Config";
+import * as Renderers from "../utils/Renderers";
 import * as Types from "../utils/Types";
-import {
-  createWaypointsTableHead,
-  createWaypointsTableBody,
-  createWaypointDetails,
-} from "../utils/Renderers";
 import FilterOptions from "./FilterOptions";
 
 const SideBar = (props: Types.SideBarProps): JSX.Element => {
   return (
-    <div className="left" style={{ width: props.width }}>
-      <h1>Waypoints</h1>
-      <div className="tableFixHead" id="waypoints">
-        <table>
-          {createWaypointsTableHead(Config.tableHeaderKeys)}
-          {createWaypointsTableBody(props.stateManager, Config.tableHeaderKeys)}
-        </table>
+    <div className="sidebar" style={{ width: props.width }}>
+      <div id="waypoints">
+        <h1>Waypoints</h1>
+        <FilterOptions stateManager={props.stateManager} />
+        <div className="tableFixHead">
+          <table>
+            {Renderers.createWaypointsTableHead(Config.tableHeaderKeys)}
+            {Renderers.createWaypointsTableBody(
+              props.stateManager,
+              Config.tableHeaderKeys
+            )}
+          </table>
+        </div>
       </div>
-      <FilterOptions stateManager={props.stateManager} />
-      <h1>Selected waypoint details</h1>
-      <div className="tableFixHead" id="waypoint-details">
-        <table>{createWaypointDetails(props.stateManager)}</table>
+      <div id="waypoint-details">
+        <h1>Selected waypoint details</h1>
+        <div className="tableFixHead">
+          <table>{Renderers.createWaypointDetails(props.stateManager)}</table>
+        </div>
       </div>
     </div>
   );

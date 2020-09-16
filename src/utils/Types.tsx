@@ -52,7 +52,6 @@ export type Action = {
 export type State = {
   rows: Row[];
   allCombinedRows: CombinedRow[];
-  tooltipContent: string;
   currentCombinedRows: CombinedRow[];
   mousePosition: Position;
   searchBarContent: string;
@@ -114,6 +113,7 @@ export interface MapChartProps {
 
 export interface ZoomControlProps {
   stateManager: StateManager;
+  width: string;
 }
 
 export interface RowMarkerProps {
