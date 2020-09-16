@@ -1,9 +1,7 @@
 import { Point } from "react-simple-maps";
 
 export type RowProp = string | Point | number;
-export type CombinedProp = Point | row[] | number | Visibility;
-export type Dispatch = React.Dispatch<action>;
-export type ZoomHandler = (zoom: number) => void;
+export type CombinedProp = Point | Row[] | number | Visibility;
 export type Visibility = boolean | undefined;
 export type Parameters = {
   [key: string]: string | undefined;
@@ -14,15 +12,15 @@ export type Dimensions = {
   scale: number;
 };
 export type StateProp =
-  | row[]
-  | combinedRow[]
+  | Row[]
+  | CombinedRow[]
   | string
-  | combinedRow
-  | position
+  | Row
+  | Position
   | number
   | boolean;
 
-export interface row {
+export type Row = {
   institution: string;
   category: string;
   lab: string;
@@ -31,94 +29,101 @@ export interface row {
   index: number;
 
   [key: string]: RowProp;
-}
+};
 
-export interface combinedRow {
+export type CombinedRow = {
   index: number;
   averageCoordinates: Point;
-  rows: row[];
+  rows: Row[];
   isMarkerVisible: Visibility;
 
   [key: string]: CombinedProp;
-}
+};
 
-export interface position {
+export type Position = {
   coordinates: Point;
   zoom: number;
-}
+};
+
+export type Action = {
+  type: string;
+  value: StateProp;
+};
+export type State = {
+  rows: Row[];
+  allCombinedRows: CombinedRow[];
+  tooltipContent: string;
+  currentCombinedRows: CombinedRow[];
+  mousePosition: Position;
+  searchBarContent: string;
+  useMarkerVisibility: boolean;
+  useSearchBar: boolean;
+  inFullMode: boolean;
+  currentRow: Row;
+};
+export type Dispatch = React.Dispatch<Action>;
+export type StateManager = [State, Dispatch];
+
+export type MarkerDetail = {
+  key: string;
+  header: string;
+  getRowPropContent: (value: any) => string;
+};
+
+export type FilterPredicate = (combinedRow: CombinedRow) => boolean;
+
+export type DisplayedPair = { name: string; fontStyle: string };
+
+export type Limits = {
+  top: number;
+  right: number;
+  bottom: number;
+  left: number;
+};
 
 export interface SideBarProps {
-  stateManager: stateManager;
+  stateManager: StateManager;
   width: string;
 }
 
 export interface FilterOptionsProps {
-  stateManager: stateManager;
+  stateManager: StateManager;
 }
 
 export interface OrphanTableRowsProps {
   keys: string[];
-  stateManager: stateManager;
-  givenCombinedRow: combinedRow;
-  givenIndex: number;
+  stateManager: StateManager;
+  givenCombinedRow: CombinedRow;
 }
 
 export interface SelectedDetailProps {
-  row: row;
+  row: Row;
   orderedIndex: number;
 }
 
 export interface SelectedDetailRowProps {
-  markerDetail: markerDetail;
+  markerDetail: MarkerDetail;
   defaultRowColor: string;
-  row: row;
+  row: Row;
 }
 
 export interface MapChartProps {
-  stateManager: stateManager;
+  stateManager: StateManager;
   width: string;
 }
 
 export interface ZoomControlProps {
-  stateManager: stateManager;
+  stateManager: StateManager;
 }
 
 export interface RowMarkerProps {
-  givenCombinedRow: combinedRow;
-  stateManager: stateManager;
+  givenCombinedRow: CombinedRow;
+  stateManager: StateManager;
 }
 
 export interface PlaceIconProps {
   transform: string;
   markerColor: string;
-}
-
-export interface state {
-  rows: row[];
-  combinedRows: combinedRow[];
-  tooltipContent: string;
-  currentCombinedRow: combinedRow;
-  mousePosition: position;
-  searchBarContent: string;
-  useMarkerVisibility: boolean;
-  useSearchBar: boolean;
-  inFullMode: boolean;
-}
-
-export interface action {
-  type: string;
-  value: StateProp;
-}
-
-export interface stateManager extends Array<state | Dispatch> {
-  0: state;
-  1: Dispatch;
-}
-
-export interface markerDetail {
-  key: string;
-  header: string;
-  getRowPropContent: (value: any) => string;
 }
 
 export interface componentToIdentifier {

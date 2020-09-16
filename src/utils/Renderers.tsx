@@ -2,7 +2,7 @@ import React from "react";
 import RowMarker from "../components/RowMarker";
 import OrphanTableRows from "../components/OrphanTableRows";
 import SelectedDetail from "../components/SelectedDetail";
-import { Geographies, Geography } from "react-simple-maps";
+import { Geographies, Geography, Point } from "react-simple-maps";
 import * as Config from "./Config";
 import * as Types from "./Types";
 
@@ -15,7 +15,7 @@ export const handleDimensions = (inFullMode: boolean): Types.Dimensions => {
 };
 
 export const createGeographies = (
-  stateManager: Types.stateManager
+  stateManager: Types.StateManager
 ): JSX.Element => {
   const [state] = stateManager;
   const currentZoom = state.mousePosition.zoom;
@@ -45,20 +45,20 @@ const createGeography = (strokeWidth: number) => (geo: any): JSX.Element => {
 };
 
 export const createRowMarkers = (
-  stateManager: Types.stateManager
+  stateManager: Types.StateManager
 ): JSX.Element[] => {
   const [state] = stateManager;
-  return state.combinedRows.map(createRowMarker(stateManager));
+  return state.allCombinedRows.map(createRowMarker(stateManager));
 };
 
-const createRowMarker = (stateManager: Types.stateManager) => (
-  givenCombinedRow: Types.combinedRow,
+const createRowMarker = (stateManager: Types.StateManager) => (
+  givenRow: Types.CombinedRow,
   givenIndex: number
-) => {
+): JSX.Element => {
   return (
     <RowMarker
       key={givenIndex}
-      givenCombinedRow={givenCombinedRow}
+      givenCombinedRow={givenRow}
       stateManager={stateManager}
     />
   );
@@ -87,7 +87,7 @@ const getTruncatedName = (zoom: number, name: string): string => {
 
 export const displayDebuggingFeatures = (
   allow: boolean,
-  pos: Types.position
+  pos: Types.Position
 ): JSX.Element | undefined => {
   return allow ? (
     <div>
@@ -107,16 +107,86 @@ export const displayDebuggingFeatures = (
 //////////////////
 
 export const getMapMarkerColor = (
-  givenCombinedRow: Types.combinedRow,
-  currentCombinedRow: Types.combinedRow
+  givenRow: Types.CombinedRow,
+  currentRows: Types.CombinedRow[]
 ): string => {
-  const selectedSameCombinedRow = givenCombinedRow === currentCombinedRow;
-  return selectedSameCombinedRow
+  const selectedSameRow = givenInCurrentRows(givenRow, currentRows);
+  return selectedSameRow
     ? Config.highlightedMarkerColor
     : Config.defaultMarkerColor;
 };
 
-export const getCombinedName = (combinedRow: Types.combinedRow): string => {
+const givenInCurrentRows = (
+  givenRow: Types.CombinedRow,
+  currentRows: Types.CombinedRow[]
+): boolean => {
+  const parentExists = currentRows.some(sameCoordinatesAndRows(givenRow));
+  return parentExists;
+};
+
+export const sameCoordinatesAndRows = (currentRow: Types.CombinedRow) => (
+  givenRow: Types.CombinedRow
+): boolean => {
+  const sameCoordinates = averageCoordinatesAreSame(
+    currentRow.averageCoordinates,
+    givenRow.averageCoordinates
+  );
+  const sameRows = rowsAreSame(currentRow.rows, givenRow.rows);
+  return sameCoordinates && sameRows;
+};
+
+const averageCoordinatesAreSame = (
+  currentCoordinates: Point,
+  givenCoordinates: Point
+): boolean => {
+  const [currentX, currentY] = currentCoordinates;
+  const [givenX, givenY] = givenCoordinates;
+  const sameX = currentX === givenX;
+  const sameY = currentY === givenY;
+  return sameX && sameY;
+};
+
+const rowsAreSame = (
+  currentRows: Types.Row[],
+  givenRows: Types.Row[]
+): boolean => {
+  /**
+   * Since it's not possible to override === in JS, I had to define equality
+   * checking for row and row[]. Equality is defined both ways since one can
+   * input [] as currentRows, in which the first reduce will return true
+   * regardless of what givenRows is.
+   */
+  const givenSameAsCurrent = currentRows.reduce(
+    checkAllRowsFoundInOther(givenRows),
+    true
+  );
+  const currentSameAsGiven = givenRows.reduce(
+    checkAllRowsFoundInOther(currentRows),
+    true
+  );
+  return givenSameAsCurrent && currentSameAsGiven;
+};
+
+const checkAllRowsFoundInOther = (otherRows: Types.Row[]) => (
+  werePreviousRowsFound: boolean,
+  thisRow: Types.Row
+): boolean => {
+  const isThisRowFound = otherRows.some(thisRowEqualsOther(thisRow));
+  return werePreviousRowsFound && isThisRowFound;
+};
+
+const thisRowEqualsOther = (thisRow: Types.Row) => (
+  otherRow: Types.Row
+): boolean => {
+  /**
+   * It is okay to use === here since state.rows, from which both thisRow
+   * and otherRow are taken from, doesn't change besides from the initial
+   * promise that fetches the waypoints JSON.
+   */
+  return thisRow === otherRow;
+};
+
+export const getCombinedName = (combinedRow: Types.CombinedRow): string => {
   const originalRows = combinedRow.rows;
   const existsMoreThanOneRow = originalRows.length > 1;
   const remainingRows = originalRows.slice(1);
@@ -126,7 +196,7 @@ export const getCombinedName = (combinedRow: Types.combinedRow): string => {
   return name;
 };
 
-const nameReducer = (accumulator: string, current: Types.row): string => {
+const nameReducer = (accumulator: string, current: Types.Row): string => {
   const accumulatedName = `${accumulator}, ${current.institution}`;
   return accumulatedName;
 };
@@ -156,20 +226,42 @@ const getMarkerScale = (zoom: number): string => {
 
 export const createMarkerText = (
   combinedName: string,
+  numberOfRows: number,
   zoom: number
 ): JSX.Element => {
   const mapMarkerOffset = handleMarkerOffset(zoom);
   const mapMarkerFontSize = handleMarkerFontSize(zoom);
-  const truncatedName = getTruncatedName(zoom, combinedName);
+  const displayedPair = getDisplayedPair(zoom, numberOfRows, combinedName);
+  const displayedName = displayedPair.name;
+  const displayedStyle = displayedPair.fontStyle;
+
   return (
     <text
       textAnchor="middle"
       y={mapMarkerOffset}
-      style={{ fontSize: mapMarkerFontSize }}
+      style={{ fontSize: mapMarkerFontSize, fontStyle: displayedStyle }}
     >
-      {truncatedName}
+      {displayedName}
     </text>
   );
+};
+
+const getDisplayedPair = (
+  zoom: number,
+  numberOfRows: number,
+  combinedName: string
+): Types.DisplayedPair => {
+  const canDisplayFullName = zoom > Config.zoomForFullName;
+  const existsMoreThanOneRow = numberOfRows > 1;
+  if (canDisplayFullName) {
+    return { name: combinedName, fontStyle: "normal" };
+  } else if (existsMoreThanOneRow) {
+    const truncatedName = `${numberOfRows} installations`;
+    return { name: truncatedName, fontStyle: "italic" };
+  } else {
+    const truncatedName = getTruncatedName(zoom, combinedName);
+    return { name: truncatedName, fontStyle: "normal" };
+  }
 };
 
 ////////////////
@@ -181,9 +273,7 @@ export const createWaypointsTableHead = (keys: string[]): JSX.Element => {
     <thead id="waypoints-head">
       <tr>
         {keys.map((key: string, index: number) => (
-          <th key={index} style={{ background: Config.tableHeaderColor }}>
-            {key}
-          </th>
+          <th key={index}>{key}</th>
         ))}
       </tr>
     </thead>
@@ -191,11 +281,11 @@ export const createWaypointsTableHead = (keys: string[]): JSX.Element => {
 };
 
 export const createWaypointsTableBody = (
-  stateManager: Types.stateManager,
+  stateManager: Types.StateManager,
   keys: string[]
 ): JSX.Element => {
   const [state] = stateManager;
-  const originalRows = state.combinedRows;
+  const originalRows = state.allCombinedRows;
   const filterPredicate = getFilterPredicate(state);
   return (
     <tbody>
@@ -206,7 +296,7 @@ export const createWaypointsTableBody = (
   );
 };
 
-const getFilterPredicate = (state: Types.state) => {
+const getFilterPredicate = (state: Types.State): Types.FilterPredicate => {
   const searchBarToggled = state.useSearchBar;
   const visibilityToggled = state.useMarkerVisibility;
   if (searchBarToggled && visibilityToggled) {
@@ -220,15 +310,15 @@ const getFilterPredicate = (state: Types.state) => {
   }
 };
 
-const includesQueryAndVisible = (state: Types.state) => (
-  combinedRow: Types.combinedRow
-) => {
+const includesQueryAndVisible = (state: Types.State) => (
+  combinedRow: Types.CombinedRow
+): boolean => {
   const includesQuery = doesCombinedRowIncludeQuery(state);
   return includesQuery(combinedRow) && isMarkerVisible(combinedRow);
 };
 
-const doesCombinedRowIncludeQuery = (state: Types.state) => (
-  givenCombinedRow: Types.combinedRow
+const doesCombinedRowIncludeQuery = (state: Types.State) => (
+  givenCombinedRow: Types.CombinedRow
 ): boolean => {
   const searchQuery = state.searchBarContent;
   const childRows = givenCombinedRow.rows;
@@ -236,7 +326,7 @@ const doesCombinedRowIncludeQuery = (state: Types.state) => (
   return foundInAnyChildren;
 };
 
-const doesRowIncludeQuery = (query: string) => (row: Types.row): boolean => {
+const doesRowIncludeQuery = (query: string) => (row: Types.Row): boolean => {
   const keys = Config.tableHeaderKeys;
   const caseInsensitiveQuery = query.toLowerCase();
   const foundInAnyKey = keys.some((key) => {
@@ -247,38 +337,48 @@ const doesRowIncludeQuery = (query: string) => (row: Types.row): boolean => {
   return foundInAnyKey;
 };
 
-const isMarkerVisible = (combinedRow: Types.combinedRow): boolean => {
+const isMarkerVisible = (combinedRow: Types.CombinedRow): boolean => {
   return combinedRow.isMarkerVisible as boolean;
 };
 
-const noFilter = (_combinedRow: Types.combinedRow): boolean => {
+const noFilter = (_combinedRow: Types.CombinedRow): boolean => {
   return true;
 };
 
 const createOrphanTableRows = (
   keys: string[],
-  stateManager: Types.stateManager
-) => (givenCombinedRow: Types.combinedRow, givenIndex: number) => {
+  stateManager: Types.StateManager
+) => (givenCombinedRow: Types.CombinedRow, givenIndex: number): JSX.Element => {
   return (
     <OrphanTableRows
       key={givenIndex}
       keys={keys}
       stateManager={stateManager}
       givenCombinedRow={givenCombinedRow}
-      givenIndex={givenIndex}
     />
   );
 };
 
 export const createWaypointDetails = (
-  stateManager: Types.stateManager
+  stateManager: Types.StateManager
 ): JSX.Element[] => {
   const [state] = stateManager;
-  const rows = state.currentCombinedRow.rows;
+  const shouldDisplaySingleRow = state.currentRow !== Config.defaultRow;
+  const rows = shouldDisplaySingleRow
+    ? [state.currentRow]
+    : getFlattenedChildRows(state.currentCombinedRows);
   return rows.map(createSelectedDetail);
 };
 
-const createSelectedDetail = (row: Types.row, index: number) => {
+export const getFlattenedChildRows = (
+  combinedRows: Types.CombinedRow[]
+): Types.Row[] => {
+  return combinedRows
+    .map((combinedRow) => combinedRow.rows)
+    .reduce((flattened, rows) => flattened.concat(rows), []);
+};
+
+const createSelectedDetail = (row: Types.Row, index: number): JSX.Element => {
   return <SelectedDetail key={index} row={row} orderedIndex={index} />;
 };
 
@@ -286,31 +386,36 @@ const createSelectedDetail = (row: Types.row, index: number) => {
 // OrphanTableRows.tsx
 ////////////////////////
 
-export const getTableRowColor = (
-  givenCombinedRow: Types.combinedRow,
-  currentCombinedRow: Types.combinedRow,
-  givenIndex: number
-): string => {
-  const selectedSameCombinedRow = givenCombinedRow === currentCombinedRow;
-  const defaultRowColor = getDefaultRowColor(givenIndex);
-  return selectedSameCombinedRow ? Config.highlightedRowColor : defaultRowColor;
+export const getHighlightClass = (
+  givenRow: Types.CombinedRow,
+  currentRows: Types.CombinedRow[]
+) => (shouldHighlight: boolean): string => {
+  const selectedSameCombinedRow = givenInCurrentRows(givenRow, currentRows);
+  return selectedSameCombinedRow && shouldHighlight
+    ? Config.enableHighlight
+    : Config.disableHighlight;
 };
 
-///////////////////////
-// SelectedDetail.tsx
-///////////////////////
+export const handleHighlight = (
+  currentRow: Types.Row,
+  givenRow: Types.Row
+): boolean => {
+  const highlightSiblings = rowIsDefault(currentRow);
+  const highlightSingle = currentRow === givenRow;
+  const shouldHighlight = highlightSiblings || highlightSingle;
+  return shouldHighlight;
+};
 
-export const getDefaultRowColor = (rowIndex: number): string => {
-  const rowIsEven = rowIndex % 2 === 0;
-  return rowIsEven ? Config.evenRowColor : Config.oddRowColor;
+export const rowIsDefault = (givenRow: Types.Row): boolean => {
+  return givenRow === Config.defaultRow;
 };
 
 //////////////
 // index.tsx
 //////////////
 
-export const setRootElementWidth = (value: string) => {
-  const rootElement = document.getElementById("root");
+export const setRootElementWidth = (value: string): void => {
+  const rootElement = document.getElementById(Config.rootContainerName);
   if (!!rootElement) {
     rootElement.style.width = value;
   }

@@ -20,7 +20,7 @@ const SideBar = (props: Types.SideBarProps): JSX.Element => {
       </div>
       <FilterOptions stateManager={props.stateManager} />
       <h1>Selected waypoint details</h1>
-      <div className="tableFixHead waypoint-details">
+      <div className="tableFixHead" id="waypoint-details">
         <table>{createWaypointDetails(props.stateManager)}</table>
       </div>
     </div>

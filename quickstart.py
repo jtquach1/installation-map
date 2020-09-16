@@ -93,7 +93,7 @@ def is_successful(row, keys):
     try:
         successful = row[i] != 'Not yet' and row[j] == 'Yes'
     except IndexError:
-        successful = false
+        successful = False
     finally:
         return successful
 

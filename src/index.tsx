@@ -12,41 +12,13 @@ const App = (): JSX.Element => {
   const stateManager = useReducer(StateUpdaters.reducer, Config.defaultState);
   const [state, dispatch] = stateManager;
 
-  // Promise to get markers for served build
-  useEffect(() => {
-    const fetchMarkers = async () => {
-      const response = await fetch("/static/waypoints.json");
-      const markers = await response.json();
-      dispatch({ type: "setRows", value: markers });
-    };
-    fetchMarkers();
-  }, [dispatch]);
-
-  // Only rerenders when current combinedRows differs from previous.
-  useEffect(() => {
-    dispatch({
-      type: "updateCombinedRows",
-      value: StateUpdaters.getUpdatedCombinedRowsByZoom(
-        state.rows,
-        state.combinedRows,
-        state.mousePosition.zoom
-      ),
-    });
-  }, [
-    dispatch,
+  // Update markers from spreadsheet and render via zoom level
+  useEffect(StateUpdaters.getJsonMarkers(dispatch), []);
+  useEffect(StateUpdaters.updateAllAndCurrentCombinedRows(stateManager), [
     state.rows,
-    state.combinedRows,
-    state.mousePosition.zoom,
-    state.mousePosition.coordinates,
+    state.mousePosition,
+    state.useMarkerVisibility,
   ]);
-
-  // Display configuration for cBioPortal sidebar vs. full standalone page
-  useEffect(() => {
-    dispatch({
-      type: "setInFullMode",
-      value: StateUpdaters.checkInFullMode(),
-    });
-  }, [dispatch]);
 
   const fullModeRender = (): JSX.Element => {
     Renderers.setRootElementWidth(Config.fullWidth);

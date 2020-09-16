@@ -1,20 +1,21 @@
 import * as Config from "./Config";
-import * as Types from "./Types";
+import * as Renderers from "./Renderers";
 import * as StateUpdaters from "./StateUpdaters";
+import * as Types from "./Types";
 
 /////////////////
 // MapChart.tsx
 /////////////////
 
-export const handleMoveEnd = (stateManager: Types.stateManager) => (
-  newPosition: Types.position
+export const handleMoveEnd = (stateManager: Types.StateManager) => (
+  newPosition: Types.Position
 ): void => {
   const [state, dispatch] = stateManager;
   const originalPosition = state.mousePosition;
   const zoomLevelChanged = newPosition.zoom !== originalPosition.zoom;
-  return zoomLevelChanged
+  zoomLevelChanged
     ? dispatch({
-        type: "updateMousePositionAndRefreshMarkers",
+        type: "setMousePosition",
         value: newPosition,
       })
     : dispatch({
@@ -30,13 +31,13 @@ export const handleMoveEnd = (stateManager: Types.stateManager) => (
 // ZoomControls.tsx
 /////////////////////
 
-export const handleZoomIn = (stateManager: Types.stateManager) => (): void => {
+export const handleZoomIn = (stateManager: Types.StateManager) => (): void => {
   const [state, dispatch] = stateManager;
   const currentPosition = state.mousePosition;
   const canZoomIn = currentPosition.zoom < Config.maxZoom;
   canZoomIn &&
     dispatch({
-      type: "updateMousePositionAndRefreshMarkers",
+      type: "setMousePosition",
       value: {
         ...currentPosition,
         zoom: currentPosition.zoom * Config.zoomMultiplier,
@@ -44,13 +45,13 @@ export const handleZoomIn = (stateManager: Types.stateManager) => (): void => {
     });
 };
 
-export const handleZoomOut = (stateManager: Types.stateManager) => (): void => {
+export const handleZoomOut = (stateManager: Types.StateManager) => (): void => {
   const [state, dispatch] = stateManager;
   const currentPosition = state.mousePosition;
   const canZoomOut = currentPosition.zoom > Config.minZoom;
   canZoomOut &&
     dispatch({
-      type: "updateMousePositionAndRefreshMarkers",
+      type: "setMousePosition",
       value: {
         ...currentPosition,
         zoom: currentPosition.zoom / Config.zoomMultiplier,
@@ -76,20 +77,35 @@ export const handleMarkerOnMouse = (
 
 export const handleMarkerOnClick = (
   dispatch: Types.Dispatch,
-  givenRow: Types.combinedRow
+  givenCombinedRow: Types.CombinedRow,
+  givenRow: Types.Row
 ) => (): void => {
-  dispatch({ type: "setCurrentCombinedRow", value: givenRow });
-  handleWaypointsTableScrollbar(givenRow.index);
+  const highlightMultipleRows = Renderers.rowIsDefault(givenRow);
+  const betweenAnySiblings = givenCombinedRow.rows.indexOf(givenRow);
+  const aboveAllSiblings = 0;
+  const rowIndexRelativeToSiblings = highlightMultipleRows
+    ? aboveAllSiblings
+    : betweenAnySiblings;
+  dispatch({ type: "setCurrentCombinedRows", value: [givenCombinedRow] });
+  dispatch({ type: "setCurrentRow", value: givenRow });
+  handleWaypointsTableScrollbar(
+    givenCombinedRow.index,
+    rowIndexRelativeToSiblings
+  );
 };
 
-const handleWaypointsTableScrollbar = (rowIndex: number): void => {
+export const handleWaypointsTableScrollbar = (
+  combinedRowIndex: number,
+  rowIndex: number
+): void => {
   const waypointsTable = document.getElementById("waypoints");
-  const firstRowOffset = getFirstRowOffset(rowIndex);
+  const firstRowOffset = getFirstRowOffset(combinedRowIndex, rowIndex);
   const tableHeadHeight = getTableHeadHeight();
   if (!waypointsTable || !firstRowOffset || !tableHeadHeight) {
   } else {
-    const newVerticalScrollPosition = firstRowOffset - tableHeadHeight;
-    waypointsTable.scrollTo(0, newVerticalScrollPosition);
+    const defaultHorizontalPosition = 0;
+    const newVerticalPosition = firstRowOffset - tableHeadHeight;
+    waypointsTable.scrollTo(defaultHorizontalPosition, newVerticalPosition);
   }
 };
 
@@ -98,11 +114,14 @@ const getTableHeadHeight = (): number | undefined => {
   return waypointsTableHead?.offsetHeight;
 };
 
-const getFirstRowOffset = (rowIndex: number): number | undefined => {
-  const markerIdentifier = StateUpdaters.getMarkerIdentifier(rowIndex);
+const getFirstRowOffset = (
+  combinedRowIndex: number,
+  rowIndex: number
+): number | undefined => {
+  const markerIdentifier = StateUpdaters.getMarkerIdentifier(combinedRowIndex);
   const tableRows = document.getElementsByClassName(markerIdentifier);
-  const firstTableRow = tableRows[0] as HTMLElement | undefined;
-  return !firstTableRow ? undefined : firstTableRow.offsetTop;
+  const tableRowToSnapTo = tableRows[rowIndex] as HTMLElement | undefined;
+  return !tableRowToSnapTo ? undefined : tableRowToSnapTo.offsetTop;
 };
 
 //////////////////////
@@ -110,13 +129,13 @@ const getFirstRowOffset = (rowIndex: number): number | undefined => {
 //////////////////////
 
 export const handleVisibilityToggle = (
-  stateManager: Types.stateManager
+  stateManager: Types.StateManager
 ) => (): void => {
   const [state, dispatch] = stateManager;
   dispatch({ type: "toggleVisibility", value: !state.useMarkerVisibility });
 };
 
-export const handleInputText = (stateManager: Types.stateManager) => (
+export const handleInputText = (stateManager: Types.StateManager) => (
   event: React.ChangeEvent<HTMLInputElement>
 ): void => {
   const [, dispatch] = stateManager;
@@ -125,7 +144,7 @@ export const handleInputText = (stateManager: Types.stateManager) => (
 };
 
 export const handleInputClear = (
-  stateManager: Types.stateManager
+  stateManager: Types.StateManager
 ) => (): void => {
   const [, dispatch] = stateManager;
   dispatch({ type: "toggleSearchBarQuery", value: false });

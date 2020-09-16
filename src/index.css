@@ -72,15 +72,6 @@ svg {
   margin-right: 0.25rem;
 }
 
-.tableFixHead {
-  overflow-y: auto;
-  max-height: 18em;
-}
-#waypoints thead th {
-  position: sticky;
-  top: 0;
-}
-
 table {
   border-collapse: collapse;
   width: 100%;
@@ -89,8 +80,38 @@ th,
 td {
   padding: 8px 16px;
 }
+
+.tableFixHead {
+  overflow-y: auto;
+  max-height: 18em;
+}
+
 .tableFixHead:first-of-type {
   margin-bottom: 0.67em;
+}
+
+#waypoints thead th {
+  position: sticky;
+  top: 0;
+}
+
+#waypoints-head th,
+#waypoint-details thead th {
+  background: #dcdcdc;
+}
+
+#waypoints tr:nth-child(odd),
+#waypoint-details thead:nth-child(odd) td {
+  background: #ededed;
+}
+
+#waypoints tr:nth-child(even),
+#waypoint-details thead:nth-child(even) td {
+  background: #f6f6f6;
+}
+
+.highlighted {
+  background: #c3e3fb !important;
 }
 
 /* The thick country border that gets displayed when clicking on a country is 

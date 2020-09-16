@@ -1,42 +1,40 @@
 import React from "react";
-import * as Types from "./../utils/Types";
-import * as Renderers from "../utils/Renderers";
 import * as EventHandlers from "../utils/EventHandlers";
+import * as Renderers from "../utils/Renderers";
 import * as StateUpdaters from "../utils/StateUpdaters";
+import * as Types from "./../utils/Types";
 
 const OrphanTableRows = (props: Types.OrphanTableRowsProps): JSX.Element => {
   const [state, dispatch] = props.stateManager;
-  const rows = props.givenCombinedRow.rows;
-  const combinedRowColor = Renderers.getTableRowColor(
-    props.givenCombinedRow,
-    state.currentCombinedRow,
-    props.givenIndex
-  );
-  const markerIdentifier = StateUpdaters.getMarkerIdentifier(
-    props.givenCombinedRow.index
-  );
+  const givenRow = props.givenCombinedRow;
+  const currentRows = state.currentCombinedRows;
+  const markerIdentifier = StateUpdaters.getMarkerIdentifier(givenRow.index);
+  const highlightValidRow = Renderers.getHighlightClass(givenRow, currentRows);
 
   /* React.Fragment allows for the return of orphan sibling elements without 
   adding an extra parent element to the DOM. The table rows need to be orphans 
   here, or else the encompassing tbody will have an illegal structure. */
   return (
     <React.Fragment>
-      {rows.map((row) => (
-        <tr
-          key={row.index}
-          onClick={EventHandlers.handleMarkerOnClick(
-            dispatch,
-            props.givenCombinedRow
-          )}
-          style={{ background: combinedRowColor }}
-          className={markerIdentifier}
-        >
-          {props.keys.map((key, index) => {
-            const keyIsValid = key in row;
-            return keyIsValid && <td key={index}>{row[key]}</td>;
-          })}
-        </tr>
-      ))}
+      {givenRow.rows.map((row) => {
+        const shouldHighlight = Renderers.handleHighlight(
+          state.currentRow,
+          row
+        );
+        const markerHighlight = highlightValidRow(shouldHighlight);
+        return (
+          <tr
+            key={row.index}
+            onClick={EventHandlers.handleMarkerOnClick(dispatch, givenRow, row)}
+            className={`${markerIdentifier} ${markerHighlight}`}
+          >
+            {props.keys.map((key, index) => {
+              const keyIsValid = key in row;
+              return keyIsValid && <td key={index}>{row[key]}</td>;
+            })}
+          </tr>
+        );
+      })}
     </React.Fragment>
   );
 };
