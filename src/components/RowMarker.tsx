@@ -25,8 +25,6 @@ const RowMarker = (props: Types.RowMarkerProps): JSX.Element => {
         Config.defaultRow
       )}
       coordinates={givenRow.averageCoordinates}
-      onMouseEnter={EventHandlers.handleMarkerOnMouse(dispatch, combinedName)}
-      onMouseLeave={EventHandlers.handleMarkerOnMouse(dispatch)}
       id={StateUpdaters.getMarkerIdentifier(givenRow.index)}
     >
       <PlaceIcon transform={mapMarkerTransform} markerColor={mapMarkerColor} />

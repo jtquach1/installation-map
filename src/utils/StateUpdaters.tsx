@@ -20,8 +20,6 @@ export const reducer = (
         ...state,
         allCombinedRows: action.value as Types.CombinedRow[],
       };
-    case "setTooltipContent":
-      return { ...state, tooltipContent: action.value as string };
     case "setCurrentCombinedRows":
       return {
         ...state,
@@ -140,62 +138,70 @@ const getEarliestCombinedRow = (
 
 const getEarliestIndexSoFar = (
   earliestIndexSoFar: number,
-  currentRow: Types.CombinedRow
+  currentCombinedRow: Types.CombinedRow
 ): number => {
-  return currentRow.index <= earliestIndexSoFar
-    ? currentRow.index
+  return currentCombinedRow.index <= earliestIndexSoFar
+    ? currentCombinedRow.index
     : earliestIndexSoFar;
 };
 
 const getUpdatedCombinedRowsByZoom = (
   rows: Types.Row[],
-  allCombinedRows: Types.CombinedRow[],
+  combinedRows: Types.CombinedRow[],
   zoom: number
 ): Types.CombinedRow[] => {
-  return rows.reduce(collectNearbyRowsByZoom(zoom), allCombinedRows);
+  return rows.reduce(collectNearbyRowsByZoom(zoom), combinedRows);
 };
 
 const collectNearbyRowsByZoom = (zoom: number) => (
-  allRows: Types.CombinedRow[],
+  accumulatedRows: Types.CombinedRow[],
   givenRow: Types.Row
 ): Types.CombinedRow[] => {
-  const givenCoordinates = givenRow.coordinates;
-  const maxRadius = Config.baseRadius / zoom;
   const parentIndex = findParentCombinedRowIndex(
-    allRows,
-    givenCoordinates,
-    maxRadius
+    accumulatedRows,
+    givenRow,
+    zoom
   );
   const parentExists = parentIndex !== -1;
-  const parentCombinedRow = allRows[parentIndex];
+  return parentExists
+    ? getRowsWithUpdatedParent(givenRow, accumulatedRows, parentIndex)
+    : getRowsWithNewParent(givenRow, accumulatedRows);
+};
 
-  if (parentExists) {
-    const siblingRows = parentCombinedRow.rows;
-    const newCoordinates = computeAverageCoordinates(siblingRows, givenRow);
-    const newRows = updateExistingRows(siblingRows, givenRow);
-    allRows[parentIndex] = createCombinedRow(
-      newCoordinates,
-      newRows,
-      parentIndex
-    );
-  } else {
-    const newCoordinates = givenRow.coordinates;
-    const newRows = [givenRow];
-    const newParentIndex = allRows.length;
-    allRows = [
-      ...allRows,
-      createCombinedRow(newCoordinates, newRows, newParentIndex),
-    ];
-  }
-  return allRows;
+const getRowsWithUpdatedParent = (
+  givenRow: Types.Row,
+  combinedRows: Types.CombinedRow[],
+  parentIndex: number
+): Types.CombinedRow[] => {
+  const parentCombinedRow = combinedRows[parentIndex];
+  const siblingRows = parentCombinedRow.rows;
+  const newCoordinates = computeAverageCoordinates(siblingRows, givenRow);
+  const newRows = updateExistingRows(siblingRows, givenRow);
+  const updatedParent = createCombinedRow(newCoordinates, newRows, parentIndex);
+  combinedRows[parentIndex] = updatedParent;
+  return combinedRows;
+};
+
+const getRowsWithNewParent = (
+  givenRow: Types.Row,
+  combinedRows: Types.CombinedRow[]
+): Types.CombinedRow[] => {
+  const newCoordinates = givenRow.coordinates;
+  const newRows = [givenRow];
+  const newParentIndex = combinedRows.length;
+  const newParent = createCombinedRow(newCoordinates, newRows, newParentIndex);
+  combinedRows = [...combinedRows, newParent];
+  return combinedRows;
 };
 
 const findParentCombinedRowIndex = (
-  allRows: Types.CombinedRow[],
-  givenCoordinates: Point,
-  maxRadius: number
+  combinedRows: Types.CombinedRow[],
+  givenRow: Types.Row,
+  zoom: number
 ): number => {
-  return allRows.findIndex((parentCombinedRow) => {
+  const givenCoordinates = givenRow.coordinates;
+  const maxRadius = Config.baseRadius / zoom;
+  return combinedRows.findIndex((parentCombinedRow) => {
     const parentCoordinates = parentCombinedRow.averageCoordinates;
     return areCoordinatesWithinRange(
       parentCoordinates,
@@ -225,7 +231,10 @@ const computeAverageCoordinates = (
   siblingRows: Types.Row[],
   currentRow: Types.Row
 ): Point => {
-  const totalPoint = siblingRows.reduce(pointReducer, currentRow.coordinates);
+  const totalPoint = siblingRows.reduce(
+    collectCoordinates,
+    currentRow.coordinates
+  );
   const [totalLng, totalLat] = totalPoint;
   const newLength = siblingRows.length + 1;
   const averageLng = totalLng / newLength;
@@ -233,11 +242,11 @@ const computeAverageCoordinates = (
   return [averageLng, averageLat];
 };
 
-const pointReducer = (
-  runningTotalPoint: Point,
+const collectCoordinates = (
+  accumulatedCoordinates: Point,
   currentRow: Types.Row
 ): Point => {
-  const [accumulatedLng, accumulatedLat] = runningTotalPoint;
+  const [accumulatedLng, accumulatedLat] = accumulatedCoordinates;
   const [currentLng, currentLat] = currentRow.coordinates;
   const newLng = accumulatedLng + currentLng;
   const newLat = accumulatedLat + currentLat;
@@ -281,12 +290,24 @@ const elementIsInViewport = (element: HTMLElement | null): Types.Visibility => {
     return undefined;
   } else {
     const limits = getViewportLimits(rootContainer, mapContainer);
-    const withinVerticalBounds =
-      rectangle.bottom >= limits.bottom && rectangle.top < limits.top;
-    const withinHorizontalBounds =
-      rectangle.right >= limits.right && rectangle.left < limits.left;
+    const withinVerticalBounds = rectInVerticalBounds(rectangle, limits);
+    const withinHorizontalBounds = rectInHorizontalBounds(rectangle, limits);
     return withinVerticalBounds && withinHorizontalBounds;
   }
+};
+
+const rectInVerticalBounds = (
+  rectangle: DOMRect,
+  limits: Types.Limits
+): boolean => {
+  return rectangle.bottom >= limits.bottom && rectangle.top < limits.top;
+};
+
+const rectInHorizontalBounds = (
+  rectangle: DOMRect,
+  limits: Types.Limits
+): boolean => {
+  return rectangle.right >= limits.right && rectangle.left < limits.left;
 };
 
 const getViewportLimits = (
@@ -328,9 +349,15 @@ const getWindowUrlParameters = (): Types.Parameters => {
   const parameters = query
     .split("&")
     .map((assignment) => assignment.split("="))
-    .reduce((variable, value) => {
-      variable[value[0]] = value[1];
-      return variable;
-    }, {} as Types.Parameters);
+    .reduce(collectParameters, {} as Types.Parameters);
   return parameters;
+};
+
+const collectParameters = (
+  accumulatedParameters: Types.Parameters,
+  currentAssignment: string[]
+): Types.Parameters => {
+  const [variable, value] = currentAssignment;
+  accumulatedParameters[variable] = value;
+  return accumulatedParameters;
 };

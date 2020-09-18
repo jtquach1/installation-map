@@ -59,18 +59,6 @@ export const handleZoomOut = (stateManager: Types.StateManager) => (): void => {
     });
 };
 
-//////////////////
-// RowMarker.tsx
-//////////////////
-
-export const handleMarkerOnMouse = (
-  dispatch: Types.Dispatch,
-  combinedName?: string
-) => (): void => {
-  const newTooltipContent = combinedName || Config.defaultTooltipContent;
-  dispatch({ type: "setTooltipContent", value: newTooltipContent });
-};
-
 ////////////////////////
 // OrphanTableRows.tsx
 ////////////////////////
@@ -98,19 +86,20 @@ export const handleWaypointsTableScrollbar = (
   combinedRowIndex: number,
   rowIndex: number
 ): void => {
-  const waypointsTable = document.getElementById("waypoints");
+  const waypointsTable = document.getElementsByClassName(
+    Config.scrollableTableName
+  )[0];
   const firstRowOffset = getFirstRowOffset(combinedRowIndex, rowIndex);
   const tableHeadHeight = getTableHeadHeight();
   if (!waypointsTable || !firstRowOffset || !tableHeadHeight) {
   } else {
-    const defaultHorizontalPosition = 0;
     const newVerticalPosition = firstRowOffset - tableHeadHeight;
-    waypointsTable.scrollTo(defaultHorizontalPosition, newVerticalPosition);
+    waypointsTable.scrollTo({ top: newVerticalPosition, behavior: "smooth" });
   }
 };
 
 const getTableHeadHeight = (): number | undefined => {
-  const waypointsTableHead = document.getElementById("waypoints-head");
+  const waypointsTableHead = document.getElementById(Config.waypointsHeadName);
   return waypointsTableHead?.offsetHeight;
 };
 

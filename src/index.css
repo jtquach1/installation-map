@@ -1,64 +1,54 @@
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
-    monospace;
-}
-
-html {
-  font-family: system-ui, sans-serif;
-  font-size: 1.25rem;
-}
-
-svg {
-  display: inline-block;
-  vertical-align: middle;
+  padding: 0;
+  overflow-y: scroll;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.428571429;
+  color: #333333;
 }
 
 #wrapper {
   display: flex;
-  flex-direction: row;
+  align-items: center;
+  justify-content: center;
 }
 
-.left {
-  background-color: #f9f9f9;
+.sidebar {
+  background-color: #f5f5f5;
   align-self: stretch;
+  padding: 5px;
 }
 
-.left h1 {
+.sidebar h1 {
   font-size: 24px;
   color: #3786c2;
-  font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-weight: 500;
   line-height: 1.1;
-  margin: 0.67em 0;
+  margin: 0 0 0.67em 0;
   box-sizing: border-box;
-  margin-left: 20px;
+  text-align: center;
 }
 
 .mapchart {
   background: #fff;
+  cursor: grab;
 }
 
-.controls-wrapper {
-  width: 75%;
-  position: fixed;
+.mapchart:active,
+.mapchart:focus-within {
+  cursor: grabbing;
 }
 
 .controls {
+  margin-top: 1.25rem;
+  position: fixed;
   display: flex;
-  margin: 1.25rem 0 0 0;
   justify-content: center;
 }
 
-.controls > button {
+.controls button {
   justify-content: center;
   align-items: center;
   padding: 0;
@@ -66,104 +56,163 @@ svg {
   width: 2rem;
   border-radius: 100%;
   border: 0;
+  background: #3786c2;
+}
+
+.controls button:hover {
+  background: #8bc5f1;
+  cursor: default;
 }
 
 .controls > button:first-child {
   margin-right: 0.25rem;
 }
 
-table {
-  border-collapse: collapse;
-  width: 100%;
-}
-th,
-td {
-  padding: 8px 16px;
+.rsm-marker:hover,
+.rsm-marker:active {
+  cursor: default;
 }
 
-.tableFixHead {
-  overflow-y: auto;
-  max-height: 18em;
+/* Outline width can't change upon zoom, so hide it. */
+.rsm-geography,
+.search input,
+.controls button {
+  outline: 0;
 }
 
-.tableFixHead:first-of-type {
-  margin-bottom: 0.67em;
+.filter-options {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.search {
+  display: flex;
+  flex-grow: 1;
+  margin-right: 5px;
+}
+
+.search input {
+  display: block;
+  color: #555555;
+  background-image: none;
+  border: 1px solid #ddd;
+  font-size: 12px;
+  padding: 5px 10px;
+  line-height: 1.5;
+  transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+}
+
+.search input[type="text"] {
+  background: #fff;
+  border-radius: 3px;
+  border-bottom-right-radius: 0;
+  border-top-right-radius: 0;
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+  flex-grow: 1;
+}
+
+.search input[type="text"]:focus {
+  border-color: #66afe9;
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075),
+    0 0 8px rgba(102, 175, 233, 0.6);
+}
+
+.search input[type="button"] {
+  background: #ddd;
+  border-radius: 3px;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  cursor: default;
+}
+
+.search input[type="button"]:hover {
+  background: #ccc;
+  border: 1px solid #ccc;
+}
+
+.visibility {
+  display: flex;
+  justify-content: center;
+}
+
+#waypoints,
+#waypoint-details {
+  background: #fff;
+  padding: 5px;
+  border-radius: 5px;
+}
+
+#waypoints {
+  margin-bottom: 20px;
 }
 
 #waypoints thead th {
+  box-shadow: 0 2px 0 #ccc;
   position: sticky;
   top: 0;
+  text-transform: capitalize;
+}
+
+#waypoints tbody td,
+#waypoint-details td {
+  padding: 3px 10px;
+  border-top: none;
+}
+
+#waypoints tr,
+.search input[type="button"],
+.controls button {
+  transition: background-color ease-in-out 0.15s;
 }
 
 #waypoints-head th,
-#waypoint-details thead th {
-  background: #dcdcdc;
+#waypoint-details th {
+  vertical-align: top;
+  line-height: 1.1;
+  padding: 8px;
+  text-align: left;
+  background: #fff;
 }
 
 #waypoints tr:nth-child(odd),
-#waypoint-details thead:nth-child(odd) td {
-  background: #ededed;
+#waypoint-details tr:nth-child(odd) td {
+  background: #f9f9f9;
 }
 
 #waypoints tr:nth-child(even),
-#waypoint-details thead:nth-child(even) td {
-  background: #f6f6f6;
+#waypoint-details tr:nth-child(even) td {
+  background: #fff;
+}
+
+#waypoint-details tr {
+  display: flex;
+}
+
+#waypoint-details tr:nth-child(5n) {
+  border-bottom: 1px solid #ccc;
+}
+
+#waypoint-details th {
+  flex: 2;
+}
+
+#waypoint-details td {
+  flex-grow: 1;
+  flex: 3;
 }
 
 .highlighted {
   background: #c3e3fb !important;
 }
 
-/* The thick country border that gets displayed when clicking on a country is 
-a bit annoying to look at. It would be nice to have its border scale by zoom, 
-just like the rest of the svg elements. I've tried to modify the width via 
-CSS just to see how the border width works, but it looks like setting the 
-width to any nonnegative number still displays the border with the same 
-visible width. e.g. 500px or 5px or 1px still shows the same thick border. But 
-changing it to 0px makes the border totally disappear, so I know the 
-outline-width property still works! How confusing. */
-.rsm-geography:focus {
-  /* outline: -webkit-focus-ring-color auto 5px; */
-  /* outline-color: -webkit-focus-ring-color; */
-  /* outline-style: auto; */
-  outline-width: 0px;
+.tableFixHead {
+  overflow-y: auto;
+  max-height: 25em;
 }
 
-.filter-options {
-  float: left;
-  margin-bottom: 1em;
-  margin-left: 20px;
-}
-
-.search {
-  float: left;
-}
-
-.search input[type="text"] {
-  border: none;
-  float: left;
-  font-size: 17px;
-  margin-top: 8px;
-  min-width: 250px;
-  padding: 6px;
-}
-
-.search input[type="button"] {
-  border: none;
-  cursor: pointer;
-  background: #ddd;
-  float: left;
-  font-size: 17px;
-  margin-top: 8px;
-  margin-right: 8px;
-  padding: 6px;
-}
-
-.search button:hover {
-  background: #ccc;
-}
-
-.visibility {
-  float: left;
-  margin-top: 8px;
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+  width: 100%;
 }
