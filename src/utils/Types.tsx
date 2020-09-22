@@ -59,6 +59,7 @@ export type State = {
   useSearchBar: boolean;
   inFullMode: boolean;
   currentRow: Row;
+  displayDetailedMap: boolean;
 };
 export type Dispatch = React.Dispatch<Action>;
 export type StateManager = [State, Dispatch];

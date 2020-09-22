@@ -35,6 +35,8 @@ export const reducer = (
       return { ...state, useSearchBar: action.value as boolean };
     case "setCurrentRow":
       return { ...state, currentRow: action.value as Types.Row };
+    case "setDisplayDetailedMap":
+      return { ...state, displayDetailedMap: action.value as boolean };
     default:
       return state;
   }
@@ -75,6 +77,20 @@ export const updateAllAndCurrentCombinedRows = (
     dispatch({
       type: "setCurrentCombinedRows",
       value: updatedCurrentCombinedRows,
+    });
+  };
+};
+
+export const renderJsonMap = (
+  stateManager: Types.StateManager
+): React.EffectCallback => {
+  const [state, dispatch] = stateManager;
+  return () => {
+    const zoom = state.mousePosition.zoom;
+    const shouldDisplayDetailedMap = zoom >= Config.zoomForDetailedMap;
+    dispatch({
+      type: "setDisplayDetailedMap",
+      value: shouldDisplayDetailedMap,
     });
   };
 };

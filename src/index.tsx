@@ -18,6 +18,11 @@ const App = (): JSX.Element => {
     state.useMarkerVisibility,
   ]);
 
+  // Render detailed map only when zoomed in enough since it lags on min zoom
+  useEffect(StateUpdaters.renderJsonMap(stateManager), [
+    state.mousePosition.zoom,
+  ]);
+
   const fullModeRender = (): JSX.Element => {
     return (
       <div id="wrapper">

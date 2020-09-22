@@ -21,7 +21,7 @@ export const createGeographies = (
   const currentZoom = state.mousePosition.zoom;
   const strokeWidth = handleStrokeWidth(currentZoom);
   return (
-    <Geographies geography={Config.geoUrl}>
+    <Geographies geography={getGeoUrl(stateManager)}>
       {({ geographies }) => geographies.map(createGeography(strokeWidth))}
     </Geographies>
   );
@@ -30,6 +30,11 @@ export const createGeographies = (
 const handleStrokeWidth = (zoom: number): number => {
   const newStrokeWidth = Config.baseStrokeThickness / zoom;
   return newStrokeWidth;
+};
+
+const getGeoUrl = (stateManager: Types.StateManager): string => {
+  const [state] = stateManager;
+  return state.displayDetailedMap ? Config.detailedMap : Config.simpleMap;
 };
 
 const createGeography = (strokeWidth: number) => (geo: any): JSX.Element => {
