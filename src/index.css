@@ -73,6 +73,10 @@ body {
   cursor: default;
 }
 
+.invisible {
+  visibility: hidden;
+}
+
 /* Outline width can't change upon zoom, so hide it. */
 .rsm-geography,
 .search input,
@@ -86,10 +90,18 @@ body {
   justify-content: center;
 }
 
-.search {
+.filter-options > form {
   display: flex;
-  flex-grow: 1;
   margin-right: 5px;
+  justify-content: center;
+}
+
+.filter-options > form:last-child {
+  margin-right: 0;
+}
+
+.search {
+  flex-grow: 1;
 }
 
 .search input {
@@ -129,11 +141,6 @@ body {
 .search input[type="button"]:hover {
   background: #ccc;
   border: 1px solid #ccc;
-}
-
-.visibility {
-  display: flex;
-  justify-content: center;
 }
 
 #waypoints,

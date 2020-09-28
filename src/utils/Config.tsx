@@ -72,10 +72,9 @@ export const defaultState: Types.State = {
   currentCombinedRows: defaultCombinedRows,
   mousePosition: defaultMousePosition,
   searchBarContent: defaultSearchBarContent,
-  useMarkerVisibility: defaultToggle,
-  useSearchBar: defaultToggle,
   inFullMode: defaultMode,
   currentRow: defaultRow,
+  syncMapAndTable: !defaultToggle,
 };
 
 /**
