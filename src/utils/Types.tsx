@@ -55,10 +55,9 @@ export type State = {
   currentCombinedRows: CombinedRow[];
   mousePosition: Position;
   searchBarContent: string;
-  useMarkerVisibility: boolean;
-  useSearchBar: boolean;
   inFullMode: boolean;
   currentRow: Row;
+  syncMapAndTable: boolean;
 };
 export type Dispatch = React.Dispatch<Action>;
 export type StateManager = [State, Dispatch];
@@ -119,6 +118,7 @@ export interface ZoomControlProps {
 export interface RowMarkerProps {
   givenCombinedRow: CombinedRow;
   stateManager: StateManager;
+  isVisible: boolean;
 }
 
 export interface PlaceIconProps {

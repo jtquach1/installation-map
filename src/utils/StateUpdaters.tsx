@@ -29,12 +29,10 @@ export const reducer = (
       return { ...state, mousePosition: action.value as Types.Position };
     case "setSearchBarContent":
       return { ...state, searchBarContent: action.value as string };
-    case "toggleVisibility":
-      return { ...state, useMarkerVisibility: action.value as boolean };
-    case "toggleSearchBarQuery":
-      return { ...state, useSearchBar: action.value as boolean };
     case "setCurrentRow":
       return { ...state, currentRow: action.value as Types.Row };
+    case "toggleSync":
+      return { ...state, syncMapAndTable: action.value as boolean };
     default:
       return state;
   }
@@ -42,44 +40,40 @@ export const reducer = (
 
 export const getJsonMarkers = (
   dispatch: Types.Dispatch
-): React.EffectCallback => {
-  return () => {
-    const fetchMarkers = async (): Promise<void> => {
-      const response: Response = await fetch("/static/waypoints.json");
-      const markers: Types.Row[] = await response.json();
-      dispatch({ type: "setRows", value: markers });
-    };
-    fetchMarkers();
+): React.EffectCallback => () => {
+  const fetchMarkers = async (): Promise<void> => {
+    const response: Response = await fetch("/static/waypoints.json");
+    const markers: Types.Row[] = await response.json();
+    dispatch({ type: "setRows", value: markers });
   };
+  fetchMarkers();
 };
 
 export const updateAllAndCurrentCombinedRows = (
   stateManager: Types.StateManager
-): React.EffectCallback => {
+): React.EffectCallback => () => {
   const [state, dispatch] = stateManager;
-  return () => {
-    const updatedCombinedRows = getUpdatedCombinedRowsByZoom(
-      state.rows,
-      Config.defaultCombinedRows,
-      state.mousePosition.zoom
-    );
-    const updatedCurrentCombinedRows = getUpdatedCurrentCombinedRows(
-      updatedCombinedRows,
-      state.currentCombinedRows
-    );
-    scrollToEarliestCurrentRow(updatedCurrentCombinedRows, updatedCombinedRows);
-    dispatch({
-      type: "setAllCombinedRows",
-      value: updatedCombinedRows,
-    });
-    dispatch({
-      type: "setCurrentCombinedRows",
-      value: updatedCurrentCombinedRows,
-    });
-  };
+  const updatedCombinedRows = updateAllCombinedRowsByZoom(
+    state.rows,
+    Config.defaultCombinedRows,
+    state.mousePosition.zoom
+  );
+  const updatedCurrentCombinedRows = updateCurrentCombinedRows(
+    updatedCombinedRows,
+    state.currentCombinedRows
+  );
+  scrollToEarliestCurrentRow(updatedCurrentCombinedRows, updatedCombinedRows);
+  dispatch({
+    type: "setAllCombinedRows",
+    value: updatedCombinedRows,
+  });
+  dispatch({
+    type: "setCurrentCombinedRows",
+    value: updatedCurrentCombinedRows,
+  });
 };
 
-const getUpdatedCurrentCombinedRows = (
+const updateCurrentCombinedRows = (
   allCombinedRows: Types.CombinedRow[],
   currentCombinedRows: Types.CombinedRow[]
 ): Types.CombinedRow[] => {
@@ -145,7 +139,7 @@ const getEarliestIndexSoFar = (
     : earliestIndexSoFar;
 };
 
-const getUpdatedCombinedRowsByZoom = (
+const updateAllCombinedRowsByZoom = (
   rows: Types.Row[],
   combinedRows: Types.CombinedRow[],
   zoom: number
@@ -266,15 +260,18 @@ const createCombinedRow = (
   rows: Types.Row[],
   index: number
 ): Types.CombinedRow => {
+  /* Marker visibility is undefined until after its DOM element has been 
+  rendered for the very first time; this is because visibility depends on the 
+  dimensions of the DOM element. */
   return {
     averageCoordinates: averageCoordinates,
     rows: rows,
     index: index,
-    isMarkerVisible: getCombinedRowVisibility(index),
+    isMarkerVisible: undefined,
   };
 };
 
-const getCombinedRowVisibility = (index: number): Types.Visibility => {
+export const getMarkerVisibility = (index: number): Types.Visibility => {
   const elementId = getMarkerIdentifier(index);
   const svgMarker = document.getElementById(elementId);
   const isMarkerVisible = elementIsInViewport(svgMarker);
@@ -323,6 +320,26 @@ const getViewportLimits = (
   const right = rootWidth - mapWidth;
   const left = rootWidth;
   return { top, right, bottom, left };
+};
+
+export const updateMarkerVisibility = (
+  stateManager: Types.StateManager
+): React.EffectCallback => () => {
+  const [state, dispatch] = stateManager;
+  state.allCombinedRows.forEach((combinedRow) => {
+    combinedRow.isMarkerVisible = getMarkerVisibility(combinedRow.index);
+  });
+  state.currentCombinedRows.forEach((combinedRow) => {
+    combinedRow.isMarkerVisible = getMarkerVisibility(combinedRow.index);
+  });
+  dispatch({
+    type: "setAllCombinedRows",
+    value: state.allCombinedRows,
+  });
+  dispatch({
+    type: "setCurrentCombinedRows",
+    value: state.currentCombinedRows,
+  });
 };
 
 //////////////////

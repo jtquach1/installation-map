@@ -7,9 +7,31 @@ import * as Types from "./../utils/Types";
 const OrphanTableRows = (props: Types.OrphanTableRowsProps): JSX.Element => {
   const [state, dispatch] = props.stateManager;
   const givenRow = props.givenCombinedRow;
-  const currentRows = state.currentCombinedRows;
-  const markerIdentifier = StateUpdaters.getMarkerIdentifier(givenRow.index);
-  const highlightValidRow = Renderers.getHighlightClass(givenRow, currentRows);
+  const searchQuery = state.searchBarContent;
+  const rowIncludesQuery = Renderers.doesRowIncludeQuery(searchQuery);
+
+  const renderRow = (row: Types.Row): JSX.Element => {
+    const markerIdentifier = StateUpdaters.getMarkerIdentifier(givenRow.index);
+    const currentRows = state.currentCombinedRows;
+    const highlightValidRow = Renderers.getHighlightClass(
+      givenRow,
+      currentRows
+    );
+    const shouldHighlight = Renderers.handleHighlight(state.currentRow, row);
+    const markerHighlight = highlightValidRow(shouldHighlight);
+    return (
+      <tr
+        key={row.index}
+        onClick={EventHandlers.handleMarkerOnClick(dispatch, givenRow, row)}
+        className={`${markerIdentifier} ${markerHighlight}`}
+      >
+        {props.keys.map((key, index) => {
+          const keyIsValid = key in row;
+          return keyIsValid && <td key={index}>{row[key]}</td>;
+        })}
+      </tr>
+    );
+  };
 
   /* React.Fragment allows for the return of orphan sibling elements without 
   adding an extra parent element to the DOM. The table rows need to be orphans 
@@ -17,23 +39,7 @@ const OrphanTableRows = (props: Types.OrphanTableRowsProps): JSX.Element => {
   return (
     <React.Fragment>
       {givenRow.rows.map((row) => {
-        const shouldHighlight = Renderers.handleHighlight(
-          state.currentRow,
-          row
-        );
-        const markerHighlight = highlightValidRow(shouldHighlight);
-        return (
-          <tr
-            key={row.index}
-            onClick={EventHandlers.handleMarkerOnClick(dispatch, givenRow, row)}
-            className={`${markerIdentifier} ${markerHighlight}`}
-          >
-            {props.keys.map((key, index) => {
-              const keyIsValid = key in row;
-              return keyIsValid && <td key={index}>{row[key]}</td>;
-            })}
-          </tr>
-        );
+        return rowIncludesQuery(row) ? renderRow(row) : null;
       })}
     </React.Fragment>
   );

@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer } from "react";
+import React, { useEffect, useReducer, useLayoutEffect } from "react";
 import ReactDOM from "react-dom";
 import MapChart from "./components/MapChart";
 import SideBar from "./components/SideBar";
@@ -10,12 +10,18 @@ const App = (): JSX.Element => {
   const stateManager = useReducer(StateUpdaters.reducer, Config.defaultState);
   const [state, dispatch] = stateManager;
 
-  // Update markers from spreadsheet and render via zoom level
+  // Update markers from spreadsheet and render
   useEffect(StateUpdaters.getJsonMarkers(dispatch), []);
-  useEffect(StateUpdaters.updateAllAndCurrentCombinedRows(stateManager), [
+  useLayoutEffect(StateUpdaters.updateAllAndCurrentCombinedRows(stateManager), [
     state.rows,
     state.mousePosition,
-    state.useMarkerVisibility,
+    state.syncMapAndTable,
+  ]);
+
+  // Update visibility after all Markers have been rendered into DOM
+  useLayoutEffect(StateUpdaters.updateMarkerVisibility(stateManager), [
+    state.allCombinedRows,
+    state.currentCombinedRows,
   ]);
 
   const fullModeRender = (): JSX.Element => {

@@ -8,7 +8,7 @@ const SideBar = (props: Types.SideBarProps): JSX.Element => {
   return (
     <div className="sidebar" style={{ width: props.width }}>
       <div id="waypoints">
-        <h1>Waypoints</h1>
+        <h1>cBioPortal Instances</h1>
         <FilterOptions stateManager={props.stateManager} />
         <div className="tableFixHead">
           <table>
