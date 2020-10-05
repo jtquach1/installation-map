@@ -19,6 +19,7 @@ export const maxZoom = 128;
 export const minZoom = 1;
 export const zoomMultiplier = 2;
 export const zoomForFullName = 64;
+export const zoomForDetailedMap = 6;
 export const urlQuery: RegExp = /\?/i;
 export const mapContainerName = "container";
 export const rootContainerName = "root";
@@ -34,8 +35,8 @@ export const disableHighlight = "";
  * 50m and 50m simplified is in between 10m and 110m, in which they're both
  * relatively fast and detailed. 50m simplified is faster.
  * */
-export const geoUrl =
-  "https://raw.githubusercontent.com/zcreativelabs/react-simple-maps/master/topojson-maps/world-110m.json";
+export const simpleMap = "world-110m.json";
+export const detailedMap = "combined.topojson";
 
 /**
  * Default values
@@ -58,6 +59,7 @@ const defaultMousePosition: Types.Position = {
 export const defaultSearchBarContent: string = "";
 const defaultToggle: boolean = false;
 const defaultMode: boolean = StateUpdaters.checkInFullMode();
+const defaultDisplay: boolean = false;
 export const defaultRow: Types.Row = {
   institution: "",
   category: "",
@@ -74,6 +76,7 @@ export const defaultState: Types.State = {
   searchBarContent: defaultSearchBarContent,
   inFullMode: defaultMode,
   currentRow: defaultRow,
+  displayDetailedMap: defaultDisplay,
   syncMapAndTable: !defaultToggle,
 };
 

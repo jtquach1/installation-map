@@ -29,3 +29,5 @@ token.pickle
 credentials.json
 env.sh
 __pycache__/
+
+/maps

@@ -57,6 +57,7 @@ export type State = {
   searchBarContent: string;
   inFullMode: boolean;
   currentRow: Row;
+  displayDetailedMap: boolean;
   syncMapAndTable: boolean;
 };
 export type Dispatch = React.Dispatch<Action>;
