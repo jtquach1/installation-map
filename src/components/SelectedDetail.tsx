@@ -4,7 +4,7 @@ import * as Types from "../utils/Types";
 
 const SelectedDetail = (props: Types.SelectedDetailProps): JSX.Element => {
   return (
-    <React.Fragment>
+    <thead>
       {Config.markerDetailMap.map((markerDetail, index) => {
         const { key, header, getRowPropContent } = markerDetail;
         const rowProp = props.row[key];
@@ -15,7 +15,7 @@ const SelectedDetail = (props: Types.SelectedDetailProps): JSX.Element => {
           </tr>
         );
       })}
-    </React.Fragment>
+    </thead>
   );
 };
 

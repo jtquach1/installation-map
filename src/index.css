@@ -1,3 +1,22 @@
+/* Set variables to alter color */
+:root {
+  --default-marker-color: #3786c2;
+  --highlighted-marker-color: #213d75;
+  --highlighted-row-color: #213d75;
+}
+
+@keyframes grow-shrink {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
 body {
   margin: 0;
   padding: 0;
@@ -22,7 +41,7 @@ body {
 
 .sidebar h1 {
   font-size: 24px;
-  color: #3786c2;
+  color: var(--default-marker-color);
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-weight: 500;
   line-height: 1.1;
@@ -56,16 +75,26 @@ body {
   width: 2rem;
   border-radius: 100%;
   border: 0;
-  background: #3786c2;
+  background: var(--default-marker-color);
 }
 
 .controls button:hover {
-  background: #8bc5f1;
+  background: var(--highlighted-marker-color);
   cursor: default;
 }
 
 .controls > button:first-child {
   margin-right: 0.25rem;
+}
+
+.rsm-marker .highlighted {
+  fill: var(--highlighted-marker-color);
+  transform-origin: 2% 4%;
+  animation: grow-shrink 2.5s infinite;
+}
+
+.rsm-marker .unhighlighted {
+  fill: var(--default-marker-color);
 }
 
 .rsm-marker:hover,
@@ -82,6 +111,10 @@ body {
 .search input,
 .controls button {
   outline: 0;
+}
+
+.rsm-geography.border {
+  fill: none;
 }
 
 .filter-options {
@@ -154,6 +187,11 @@ body {
   margin-bottom: 20px;
 }
 
+#waypoints .highlighted {
+  background: var(--highlighted-row-color) !important;
+  color: #fff;
+}
+
 #waypoints thead th {
   box-shadow: 0 2px 0 #ccc;
   position: sticky;
@@ -165,6 +203,10 @@ body {
 #waypoint-details td {
   padding: 3px 10px;
   border-top: none;
+}
+
+#waypoints tr {
+  transition: color ease-in-out 0.15s;
 }
 
 #waypoints tr,
@@ -192,12 +234,12 @@ body {
   background: #fff;
 }
 
-#waypoint-details tr {
-  display: flex;
+#waypoint-details thead {
+  border-bottom: 1px solid #ccc;
 }
 
-#waypoint-details tr:nth-child(5n) {
-  border-bottom: 1px solid #ccc;
+#waypoint-details tr {
+  display: flex;
 }
 
 #waypoint-details th {
@@ -209,13 +251,15 @@ body {
   flex: 3;
 }
 
-.highlighted {
-  background: #c3e3fb !important;
-}
-
 .tableFixHead {
   overflow-y: auto;
   max-height: 25em;
+}
+
+.tableFixHead p {
+  margin: 0;
+  padding: 0 10px;
+  text-align: center;
 }
 
 table {

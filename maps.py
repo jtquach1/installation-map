@@ -2,49 +2,103 @@ import os
 import sys
 import json
 import subprocess
-from functools import reduce
 
-# Assume everything ending in .json is in TopoJSON format, and GeoJSON otherwise
+# Everything ending in .json is in TopoJSON format, and GeoJSON otherwise
 FILENAME_TO_COUNTRY = {
-    'nl-gemeentegrenzen-2016.json': 'Netherlands',
-    'india-states.json': 'India',
-    'uk-counties.json': 'United Kingdom',
-    'us-albers-no-HI-AL.json': 'United States of America',
-    'germany-regions.json': 'Germany',
-    'liberia-counties.json': 'Liberia',
-    'sweden-counties.json': 'Sweden',
-    'fr-departments.json': 'France',
-    'pakistan-provinces.json': 'Pakistan',
-    'mx-states.json': 'Mexico',
-    'new-zealand-regional-councils.json': 'New Zealand',
-    'norway-counties.json': 'Norway',
+    # exploratory.io
+    'states.json': 'United States of America',
+    'canada_provinces.json': 'Canada',
+    'aus_state.json': 'Australia',
+    'br_regions.json': 'Brazil',
+    # Joost Hietbrink
+    'provinces.json': 'Netherlands',
+    # deldersveld
     'algeria-provinces.json': 'Algeria',
-    'turkiye.json': 'Turkey',
-    'italy-regions.json': 'Italy',
-    'denmark-counties.json': 'Denmark',
-    'venezuela-estados.json': 'Venezuela',
-    'belgium-provinces.json': 'Belgium',
     'argentina-provinces.json': 'Argentina',
-    'spain-comunidad-with-canary-islands.json': 'Spain',
-    'czech-republic-regions.json': 'Czechia',
+    'azerbaijan-regions.json': 'Azerbaijan',
+    'belgium-provinces.json': 'Belgium',
+    'chile-regions.json': 'Chile',
     'china-provinces.json': 'China',
     'colombia-departments.json': 'Colombia',
-    'chile-regions.json': 'Chile',
-    'philippines-provinces.json': 'Philippines',
-    'nepal-zones.json': 'Nepal',
-    'azerbaijan-regions.json': 'Azerbaijan',
-    'canada_provinces.json': 'Canada',
-    'portugal-districts.json': 'Portugal',
-    'ireland-counties.json': 'Ireland',
-    'united-arab-emirates.json': 'United Arab Emirates',
-    'romania-counties.json': 'Romania',
+    'czech-republic-regions.json': 'Czechia',
+    'denmark-counties.json': 'Denmark',
     'finland-provinces.json': 'Finland',
+    'fr-departments.json': 'France',
+    'germany-regions.json': 'Germany',
+    'india-states.json': 'India',
+    'ireland-counties.json': 'Ireland',
+    'italy-regions.json': 'Italy',
     'jp-prefectures.json': 'Japan',
-    'peru-departments-no-illegal-char.json': 'Peru',
-    'south-africa-provinces.json': 'South Africa',
+    'liberia-counties.json': 'Liberia',
+    'nepal-zones.json': 'Nepal',
+    'new-zealand-regional-councils.json': 'New Zealand',
     'nigeria-states.json': 'Nigeria',
-    'poland-provinces.json': 'Poland'
+    'norway-counties.json': 'Norway',
+    'pakistan-provinces.json': 'Pakistan',
+    'peru-departments-no-illegal-char.json': 'Peru',
+    'philippines-provinces.json': 'Philippines',
+    'poland-provinces.json': 'Poland',
+    'portugal-districts.json': 'Portugal',
+    'romania-counties.json': 'Romania',
+    'south-africa-provinces.json': 'South Africa',
+    'spain-comunidad-with-canary-islands.json': 'Spain',
+    'sweden-counties.json': 'Sweden',
+    'turkiye.json': 'Turkey',
+    'uk-counties.json': 'United Kingdom',
+    'united-arab-emirates.json': 'United Arab Emirates',
+    'venezuela-estados.json': 'Venezuela',
+    # ponentesincausa
+    'mexico.json': 'Mexico',
 }
+
+LINKS = [
+    # React Simple Maps
+    'https://github.com/zcreativelabs/react-simple-maps/raw/master/topojson-maps/world-110m.json',
+    # exploratory.io
+    'https://download2.exploratory.io/maps/states.zip',
+    'https://download2.exploratory.io/maps/canada_provinces.zip',
+    'https://download2.exploratory.io/maps/aus_states.zip',
+    # May have to download this manually
+    'https://download2.exploratory.io/maps/br_regions.zip',  # not MIT licensed
+    # Joost Hietbrink
+    'https://www.webuildinternet.com/articles/2015-07-19-geojson-data-of-the-netherlands/provinces.geojson',  # unknown
+    # deldersveld
+    'https://github.com/deldersveld/topojson/raw/master/countries/algeria/algeria-provinces.json',
+    'https://github.com/deldersveld/topojson/raw/master/countries/argentina/argentina-provinces.json',
+    'https://github.com/deldersveld/topojson/raw/master/countries/azerbaijan/azerbaijan-regions.json',
+    'https://github.com/deldersveld/topojson/raw/master/countries/belgium/belgium-provinces.json',
+    'https://github.com/deldersveld/topojson/raw/master/countries/chile/chile-regions.json',
+    'https://github.com/deldersveld/topojson/raw/master/countries/china/china-provinces.json',
+    'https://github.com/deldersveld/topojson/raw/master/countries/colombia/colombia-departments.json',
+    'https://github.com/deldersveld/topojson/raw/master/countries/czech-republic/czech-republic-regions.json',
+    'https://github.com/deldersveld/topojson/raw/master/countries/denmark/denmark-counties.json',
+    'https://github.com/deldersveld/topojson/raw/master/countries/finland/finland-provinces.json',
+    'https://github.com/deldersveld/topojson/raw/master/countries/france/fr-departments.json',
+    'https://github.com/deldersveld/topojson/raw/master/countries/germany/germany-regions.json',
+    'https://github.com/deldersveld/topojson/raw/master/countries/india/india-states.json',
+    'https://github.com/deldersveld/topojson/raw/master/countries/ireland/ireland-counties.json',
+    'https://github.com/deldersveld/topojson/raw/master/countries/italy/italy-regions.json',
+    'https://github.com/deldersveld/topojson/raw/master/countries/japan/jp-prefectures.json',
+    'https://github.com/deldersveld/topojson/raw/master/countries/liberia/liberia-counties.json',
+    'https://github.com/deldersveld/topojson/raw/master/countries/nepal/nepal-zones.json',
+    'https://github.com/deldersveld/topojson/raw/master/countries/new-zealand/new-zealand-regional-councils.json',
+    'https://github.com/deldersveld/topojson/raw/master/countries/nigeria/nigeria-states.json',
+    'https://github.com/deldersveld/topojson/raw/master/countries/norway/norway-counties.json',
+    'https://github.com/deldersveld/topojson/raw/master/countries/pakistan/pakistan-provinces.json',
+    'https://github.com/deldersveld/topojson/raw/master/countries/peru/peru-departments.json',
+    'https://github.com/deldersveld/topojson/raw/master/countries/philippines/philippines-provinces.json',
+    'https://github.com/deldersveld/topojson/raw/master/countries/poland/poland-provinces.json',
+    'https://github.com/deldersveld/topojson/raw/master/countries/portugal/portugal-districts.json',
+    'https://github.com/deldersveld/topojson/raw/master/countries/romania/romania-counties.json',
+    'https://github.com/deldersveld/topojson/raw/master/countries/spain/spain-comunidad-with-canary-islands.json',
+    'https://github.com/deldersveld/topojson/raw/master/countries/sweden/sweden-counties.json',
+    'https://github.com/deldersveld/topojson/raw/master/countries/turkey/turkiye.json',
+    'https://github.com/deldersveld/topojson/raw/master/countries/united-arab-emirates/united-arab-emirates.json',
+    'https://github.com/deldersveld/topojson/raw/master/countries/united-kingdom/uk-counties.json',
+    'https://github.com/deldersveld/topojson/raw/master/countries/venezuela/venezuela-estados.json',
+    # ponentesincausa
+    'https://gist.github.com/ponentesincausa/46d1d9a94ca04a56f93d/raw/a05f4e2b42cf981e31ef9f6f9ee151a060a38c25/mexico.json',  # not MIT licensed
+]
 
 
 # Given ~/installation-map/maps.py and ~/installation-map/maps
@@ -65,25 +119,57 @@ PUBLIC_DIR = '%s%s%s' % (HOME_DIR, REPO_ROOT, 'public/')
 
 def remove_old_files(maps_path):
     os.chdir(maps_path)
-    print('Removing old .simple and .geojson files')
+    print('Removing old .simple, .merged, and .geojson files')
     os.system('rm *.simple')
+    os.system('rm *.merged')
     os.system('rm *.geojson')
 
 
-def remove_hawaii_and_alaska(usa_maps_path):
-    def can_keep_state(geometry):
-        countries_to_remove = ['Hawaii', 'Alaska']
-        is_removable = geometry['properties']['name'] in countries_to_remove
-        return not is_removable
+def get_files_not_downloaded(maps_path, links):
+    os.chdir(maps_path)
+    current_files = os.listdir(maps_path)
+    files = []
+    for link in links:
+        temp = link.split("/")
+        last = len(temp) - 1
+        filename = temp[last]
+        if not filename in current_files:
+            files.append(link)
+    return files
 
-    prefix = usa_maps_path.split(".")[0]
-    output_file = '%s-no-HI-AL.json' % prefix
-    usa_map = json.load(open(usa_maps_path))
-    geometries = usa_map['objects']['us']['geometries']
-    updated_geometries = list(filter(can_keep_state, geometries))
-    usa_map['objects']['us']['geometries'] = updated_geometries
-    with open(output_file, "w") as outfile:
-        json.dump(usa_map, outfile)
+
+def get_jsons(maps_path, links):
+    def is_zip(filename):
+        return filename.endswith('.zip')
+
+    os.chdir(maps_path)
+    files = os.listdir(maps_path)
+    zips = list(filter(is_zip, files))
+
+    # Comment out if TopoJSONs already exist
+    # for link in links:
+    #     os.system('curl -LJO %s' % link)
+
+    for zipfile in zips:
+        os.system('unzip -o %s' % zipfile)
+
+    # Convert downloaded GeoJSON to TopoJSON
+    os.system("mv mexico.json mexico.geojson")
+    files = os.listdir(maps_path)
+    os.system('find . -name "*.geojson" > geojsons.txt')
+    f = open('geojsons.txt', 'r+')
+    geojsons = f.read().splitlines()
+    f.close()
+
+    for input_geojson in geojsons:
+        temp = input_geojson.split("/")
+        last = len(temp) - 1
+        filename = temp[last]
+        temp = filename.split(".")
+        last = len(temp) - 1
+        prefix = temp[last - 1]
+        output_topojson = '%s.json' % prefix
+        convert_geo2topo(maps_path, input_geojson, output_topojson)
 
 
 def remove_peru_objects_illegal_char(peru_map_path):
@@ -98,11 +184,11 @@ def remove_peru_objects_illegal_char(peru_map_path):
 
 
 def create_filelist(path, filename_map):
-    def is_json(file):
-        return file.endswith('.json')
+    def is_json(filename):
+        return filename.endswith('.json')
 
-    def in_filename_map(file):
-        return file in filename_map
+    def in_filename_map(filename):
+        return filename in filename_map
 
     files = os.listdir(path)
     filelist = list(filter(is_json, files))
@@ -126,10 +212,11 @@ def create_template_file(base_map_path, filelist, filename_map):
     # Open base map and remove countries who will be replaced with their states
     updated_base_map = update_geometries()
 
-    # write template file
+    # Write 2 copies of template file for detailed maps with and without states
     prefix = base_map_path.split(".")[0]
     with open('%s.simple' % prefix, "w") as outfile:
         json.dump(updated_base_map, outfile)
+    os.system('cp %s.simple %s.merged' % (prefix, prefix))
 
 
 def get_countries_with_states(filelist, filename_map):
@@ -173,7 +260,24 @@ def simplify_topojsons(maps_path, filelist, filename_map):
                       (toposimplify, output_file, threshold, input_file))
 
 
-def convert_topo2geo(maps_path, filelist):
+def merge_topojson_states(maps_path, filelist, filename_map):
+    os.chdir(maps_path)
+    topomerge = '%stopomerge' % YARN_DIR
+
+    for input_file in filelist:
+        prefix = input_file.split(".")[0]
+        if not input_file in filename_map.keys():
+            continue
+        else:
+            simple = prefix + '.simple'
+            output_file = prefix + '.merged'
+            input_map = json.load(open(simple))
+            source_object = list(input_map["objects"].keys())[0]
+            os.system('%s %s=%s -o %s %s' %
+                      (topomerge, source_object, source_object, output_file, simple))
+
+
+def convert_topo2geo(maps_path, filelist, input_suffix):
     def byte_string_to_string(line):
         return line.decode('utf-8').split("\n")[0]
 
@@ -184,7 +288,7 @@ def convert_topo2geo(maps_path, filelist):
 
     # get list of all simplified topojsons with their objects
     for f in filelist:
-        input_file = f.split(".")[0] + '.simple'
+        input_file = '%s%s' % (f.split(".")[0], input_suffix)
 
         # capture standard output to a list
         command = '%s -l < %s' % (topo2geo, input_file)
@@ -193,15 +297,15 @@ def convert_topo2geo(maps_path, filelist):
     converted = list(map(byte_string_to_string, output))
     for object, f in zip(converted, filelist):
         prefix = f.split(".")[0]
-        input_file = prefix + '.simple'
-        output_file = prefix + '.geojson'
+        input_file = '%s%s' % (prefix, input_suffix)
+        output_file = '%s.geojson' % input_file
         command = '%s %s=%s < %s' % (topo2geo, object, output_file, input_file)
         os.system(command)
 
 
-def merge_geojsons(maps_path, output_geojson):
+def merge_geojsons(maps_path, output_geojson, input_suffix):
     os.chdir(maps_path)
-    input_files = '*.geojson'
+    input_files = '*%s.geojson' % input_suffix
     geojson_merge = '%sgeojson-merge' % YARN_DIR
     command = '%s %s > %s' % (geojson_merge, input_files, output_geojson)
     os.system(command)
@@ -222,16 +326,18 @@ def deploy_to_public(maps_path, input_topojson, public_path):
 
 def main():
     # GeoJSON = intermediate output
-    geojson = 'combined.geojson'
+    states_geojson = 'detailed-with-states.geojson'
+    borders_geojson = 'detailed-no-states.geojson'
 
     # TopoJSON = final output
-    topojson = 'combined.topojson'
+    states_topojson = 'detailed-with-states.topojson'
+    borders_topojson = 'detailed-no-states.topojson'
 
     # Remove all files from previous run
     remove_old_files(MAPS_DIR)
 
-    # Remove Hawaii and Alaska from USA
-    remove_hawaii_and_alaska(USA_MAP_DIR)
+    # Get JSONs for processing, will need to convert some GeoJSONs to TopoJSON
+    get_jsons(MAPS_DIR, LINKS)
 
     # Remove illegal single quote from Peru objects name
     remove_peru_objects_illegal_char(PERU_MAP_DIR)
@@ -245,17 +351,25 @@ def main():
     # Simplify TopoJSONs for merging
     simplify_topojsons(MAPS_DIR, filelist, FILENAME_TO_COUNTRY)
 
+    # Merge TopoJSON states to make countries with better borders
+    merge_topojson_states(MAPS_DIR, filelist, FILENAME_TO_COUNTRY)
+
     # Convert TopoJSONs to GeoJSONs
-    convert_topo2geo(MAPS_DIR, filelist)
+    convert_topo2geo(MAPS_DIR, filelist, '.simple')
+    convert_topo2geo(MAPS_DIR, filelist, '.merged')
 
     # Merge all GeoJSONs into 1
-    merge_geojsons(MAPS_DIR, geojson)
+    merge_geojsons(MAPS_DIR, states_geojson, '.simple')
+    merge_geojsons(MAPS_DIR, borders_geojson, '.merged')
 
     # Convert GeoJSON back to TopoJSON
-    convert_geo2topo(MAPS_DIR, geojson, topojson)
+    convert_geo2topo(MAPS_DIR, states_geojson, states_topojson)
+    convert_geo2topo(MAPS_DIR, borders_geojson, borders_topojson)
 
-    # Copy the final TopoJSON into the public folder
-    deploy_to_public(MAPS_DIR, topojson, PUBLIC_DIR)
+    # Copy the final TopoJSONs into the public folder
+    deploy_to_public(MAPS_DIR, states_topojson, PUBLIC_DIR)
+    deploy_to_public(MAPS_DIR, borders_topojson, PUBLIC_DIR)
+    deploy_to_public(MAPS_DIR, BASE_MAP, PUBLIC_DIR)
 
 
 if __name__ == '__main__':

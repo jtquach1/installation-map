@@ -18,12 +18,12 @@ export const createGeographies = (
   stateManager: Types.StateManager
 ): JSX.Element => {
   const [state] = stateManager;
-  const currentZoom = state.mousePosition.zoom;
-  const strokeWidth = handleStrokeWidth(currentZoom);
+  const thinStrokeWidth = handleStrokeWidth(state.mousePosition.zoom);
   return (
-    <Geographies geography={getGeoUrl(stateManager)}>
-      {({ geographies }) => geographies.map(createGeography(strokeWidth))}
-    </Geographies>
+    <React.Fragment>
+      {renderStates(state.displayDetailedMap, thinStrokeWidth)}
+      {renderCountries(state.displayDetailedMap, thinStrokeWidth)}
+    </React.Fragment>
   );
 };
 
@@ -32,12 +32,44 @@ const handleStrokeWidth = (zoom: number): number => {
   return newStrokeWidth;
 };
 
-const getGeoUrl = (stateManager: Types.StateManager): string => {
-  const [state] = stateManager;
-  return state.displayDetailedMap ? Config.detailedMap : Config.simpleMap;
+const renderStates = (
+  displayDetailedMap: boolean,
+  thinStrokeWidth: number
+): JSX.Element | null => {
+  const geoUrl = Config.detailedMapWithStates;
+  return displayDetailedMap ? (
+    <Geographies geography={geoUrl}>
+      {({ geographies }) =>
+        geographies.map(createGeography(thinStrokeWidth, ""))
+      }
+    </Geographies>
+  ) : null;
 };
 
-const createGeography = (strokeWidth: number) => (geo: any): JSX.Element => {
+const renderCountries = (
+  displayDetailedMap: boolean,
+  thinStrokeWidth: number
+): JSX.Element => {
+  const thickStrokeWidth = thinStrokeWidth * 2;
+  const countryStrokeWidth = displayDetailedMap
+    ? thickStrokeWidth
+    : thinStrokeWidth;
+  const countryGeoClass = displayDetailedMap ? "border" : "";
+  const geoUrl = displayDetailedMap
+    ? Config.detailedMapNoStates
+    : Config.simpleMap;
+  return (
+    <Geographies geography={geoUrl}>
+      {({ geographies }) =>
+        geographies.map(createGeography(countryStrokeWidth, countryGeoClass))
+      }
+    </Geographies>
+  );
+};
+
+const createGeography = (strokeWidth: number, geoClass: string) => (
+  geo: any
+): JSX.Element => {
   return (
     <Geography
       key={geo.rsmKey}
@@ -45,6 +77,7 @@ const createGeography = (strokeWidth: number) => (geo: any): JSX.Element => {
       fill="#EAEAEC"
       stroke="#D6D6DA"
       strokeWidth={strokeWidth}
+      className={geoClass}
     />
   );
 };
@@ -130,16 +163,6 @@ export const displayDebuggingFeatures = (
 // RowMarker.tsx
 //////////////////
 
-export const getMapMarkerColor = (
-  givenRow: Types.CombinedRow,
-  currentRows: Types.CombinedRow[]
-): string => {
-  const selectedSameRow = givenInCurrentRows(givenRow, currentRows);
-  return selectedSameRow
-    ? Config.highlightedMarkerColor
-    : Config.defaultMarkerColor;
-};
-
 const givenInCurrentRows = (
   givenRow: Types.CombinedRow,
   currentRows: Types.CombinedRow[]
@@ -148,7 +171,7 @@ const givenInCurrentRows = (
   return parentExists;
 };
 
-export const sameCoordinatesAndRows = (currentRow: Types.CombinedRow) => (
+const sameCoordinatesAndRows = (currentRow: Types.CombinedRow) => (
   givenRow: Types.CombinedRow
 ): boolean => {
   const sameCoordinates = averageCoordinatesAreSame(
@@ -298,7 +321,7 @@ const getDisplayedPair = (
   if (canDisplayFullName) {
     return { name: combinedName, fontStyle: "normal" };
   } else if (existsMoreThanOneRow) {
-    const truncatedName = `${numberOfRows} Installations`;
+    const truncatedName = `${numberOfRows} Instances`;
     return { name: truncatedName, fontStyle: "italic" };
   } else {
     const truncatedName = getTruncatedName(zoom, combinedName);
@@ -360,7 +383,7 @@ const includesQueryAndVisible = (state: Types.State) => (
   return includesQuery(combinedRow) && isMarkerVisible(combinedRow);
 };
 
-export const doesCombinedRowIncludeQuery = (state: Types.State) => (
+const doesCombinedRowIncludeQuery = (state: Types.State) => (
   combinedRow: Types.CombinedRow
 ): boolean => {
   const searchQuery = state.searchBarContent;
@@ -412,7 +435,7 @@ export const createWaypointDetails = (
   const rows = shouldDisplaySingleRow
     ? [state.currentRow]
     : getFlattenedChildRows(state.currentCombinedRows);
-  return <thead>{rows.map(createSelectedDetail)}</thead>;
+  return <React.Fragment>{rows.map(createSelectedDetail)}</React.Fragment>;
 };
 
 export const getFlattenedChildRows = (

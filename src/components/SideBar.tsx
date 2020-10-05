@@ -5,6 +5,16 @@ import * as Types from "../utils/Types";
 import FilterOptions from "./FilterOptions";
 
 const SideBar = (props: Types.SideBarProps): JSX.Element => {
+  const [state] = props.stateManager;
+  const detailsContent =
+    state.currentCombinedRows.length === 0 ? (
+      <p>
+        Select an instance in the table or map to see additional information.
+      </p>
+    ) : (
+      <table>{Renderers.createWaypointDetails(props.stateManager)}</table>
+    );
+
   return (
     <div className="sidebar" style={{ width: props.width }}>
       <div id="waypoints">
@@ -21,10 +31,8 @@ const SideBar = (props: Types.SideBarProps): JSX.Element => {
         </div>
       </div>
       <div id="waypoint-details">
-        <h1>Selected waypoint details</h1>
-        <div className="tableFixHead">
-          <table>{Renderers.createWaypointDetails(props.stateManager)}</table>
-        </div>
+        <h1>Selected Instance Details</h1>
+        <div className="tableFixHead">{detailsContent}</div>
       </div>
     </div>
   );
