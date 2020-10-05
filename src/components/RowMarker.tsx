@@ -16,6 +16,7 @@ const RowMarker = (props: Types.RowMarkerProps): JSX.Element => {
   const zoomedInEnoughToDisplay = Renderers.displayOnLargeZoom(currentZoom);
   const mapMarkerTransform = Renderers.handleMarkerTransform(currentZoom);
   const mapMarkerColor = Renderers.getMapMarkerColor(givenRow, currentRows);
+  const getVisibleClass = props.isVisible ? "" : "invisible";
 
   return (
     <Marker
@@ -26,6 +27,7 @@ const RowMarker = (props: Types.RowMarkerProps): JSX.Element => {
       )}
       coordinates={givenRow.averageCoordinates}
       id={StateUpdaters.getMarkerIdentifier(givenRow.index)}
+      className={getVisibleClass}
     >
       <PlaceIcon transform={mapMarkerTransform} markerColor={mapMarkerColor} />
       {zoomedInEnoughToDisplay &&

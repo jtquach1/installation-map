@@ -19,13 +19,13 @@ const FilterOptions = (props: Types.FilterOptionsProps): JSX.Element => {
           value="Clear"
         />
       </form>
-      <form className="visibility">
+      <form className="sync">
         <input
           type="checkbox"
-          onChange={EventHandlers.handleVisibilityToggle(props.stateManager)}
-          checked={state.useMarkerVisibility}
+          onChange={EventHandlers.handleSyncToggle(props.stateManager)}
+          checked={state.syncMapAndTable}
         />
-        <label>Filter table by visibility</label>
+        <label>Sync map and table</label>
       </form>
     </div>
   );

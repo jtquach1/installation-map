@@ -51,20 +51,39 @@ const createGeography = (strokeWidth: number) => (geo: any): JSX.Element => {
 
 export const createRowMarkers = (
   stateManager: Types.StateManager
-): JSX.Element[] => {
+): JSX.Element => {
   const [state] = stateManager;
-  return state.allCombinedRows.map(createRowMarker(stateManager));
+  const originalMarkers = state.allCombinedRows;
+  const visibleMarkers: Types.FilterPredicate = getFilterPredicate(state);
+  const invisibleMarkers: Types.FilterPredicate = (
+    combinedRow: Types.CombinedRow
+  ) => !visibleMarkers(combinedRow);
+  return state.syncMapAndTable ? (
+    <React.Fragment>
+      {originalMarkers
+        .filter(visibleMarkers)
+        .map(createRowMarker(stateManager, true))}
+      {originalMarkers
+        .filter(invisibleMarkers)
+        .map(createRowMarker(stateManager, false))}
+    </React.Fragment>
+  ) : (
+    <React.Fragment>
+      {originalMarkers.map(createRowMarker(stateManager, true))}
+    </React.Fragment>
+  );
 };
 
-const createRowMarker = (stateManager: Types.StateManager) => (
-  givenRow: Types.CombinedRow,
-  givenIndex: number
-): JSX.Element => {
+const createRowMarker = (
+  stateManager: Types.StateManager,
+  isVisible: boolean
+) => (givenRow: Types.CombinedRow, givenIndex: number): JSX.Element => {
   return (
     <RowMarker
       key={givenIndex}
       givenCombinedRow={givenRow}
       stateManager={stateManager}
+      isVisible={isVisible}
     />
   );
 };
@@ -320,8 +339,9 @@ export const createWaypointsTableBody = (
 };
 
 const getFilterPredicate = (state: Types.State): Types.FilterPredicate => {
-  const searchBarToggled = state.useSearchBar;
-  const visibilityToggled = state.useMarkerVisibility;
+  const searchBarToggled =
+    state.searchBarContent !== Config.defaultSearchBarContent;
+  const visibilityToggled = state.syncMapAndTable;
   if (searchBarToggled && visibilityToggled) {
     return includesQueryAndVisible(state);
   } else if (searchBarToggled) {
@@ -340,16 +360,18 @@ const includesQueryAndVisible = (state: Types.State) => (
   return includesQuery(combinedRow) && isMarkerVisible(combinedRow);
 };
 
-const doesCombinedRowIncludeQuery = (state: Types.State) => (
-  givenCombinedRow: Types.CombinedRow
+export const doesCombinedRowIncludeQuery = (state: Types.State) => (
+  combinedRow: Types.CombinedRow
 ): boolean => {
   const searchQuery = state.searchBarContent;
-  const childRows = givenCombinedRow.rows;
+  const childRows = combinedRow.rows;
   const foundInAnyChildren = childRows.some(doesRowIncludeQuery(searchQuery));
   return foundInAnyChildren;
 };
 
-const doesRowIncludeQuery = (query: string) => (row: Types.Row): boolean => {
+export const doesRowIncludeQuery = (query: string) => (
+  row: Types.Row
+): boolean => {
   const keys = Config.tableHeaderKeys;
   const caseInsensitiveQuery = query.toLowerCase();
   const foundInAnyKey = keys.some((key) => {

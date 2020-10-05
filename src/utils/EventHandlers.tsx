@@ -12,19 +12,52 @@ export const handleMoveEnd = (stateManager: Types.StateManager) => (
 ): void => {
   const [state, dispatch] = stateManager;
   const originalPosition = state.mousePosition;
-  const zoomLevelChanged = newPosition.zoom !== originalPosition.zoom;
-  zoomLevelChanged
-    ? dispatch({
-        type: "setMousePosition",
-        value: newPosition,
-      })
-    : dispatch({
-        type: "setMousePosition",
-        value: {
-          ...originalPosition,
-          coordinates: newPosition.coordinates,
-        },
-      });
+  const gotNewZoom = didZoomChange(newPosition, originalPosition);
+  const gotNewCoordinates = didCoordinatesChange(newPosition, originalPosition);
+
+  if (gotNewZoom && gotNewCoordinates) {
+    state.mousePosition = newPosition;
+  } else if (gotNewZoom) {
+    state.mousePosition = {
+      ...originalPosition,
+      zoom: newPosition.zoom,
+    };
+  } else if (gotNewCoordinates) {
+    state.mousePosition = {
+      ...originalPosition,
+      coordinates: newPosition.coordinates,
+    };
+  } else {
+    /* The fall-through to return is required because map panning would 
+    otherwise trigger a rerender when clicking on a Marker. */
+    return;
+  }
+
+  dispatch({
+    type: "setMousePosition",
+    value: state.mousePosition,
+  });
+};
+
+const didZoomChange = (
+  newPosition: Types.Position,
+  originalPosition: Types.Position
+): boolean => {
+  const newZoom = newPosition.zoom;
+  const originalZoom = originalPosition.zoom;
+  return newZoom !== originalZoom;
+};
+
+const didCoordinatesChange = (
+  newPosition: Types.Position,
+  originalPosition: Types.Position
+): boolean => {
+  const newCoordinates = newPosition.coordinates;
+  const originalCoordinates = originalPosition.coordinates;
+  return (
+    newCoordinates[0] !== originalCoordinates[0] &&
+    newCoordinates[1] !== originalCoordinates[1]
+  );
 };
 
 /////////////////////
@@ -32,31 +65,29 @@ export const handleMoveEnd = (stateManager: Types.StateManager) => (
 /////////////////////
 
 export const handleZoomIn = (stateManager: Types.StateManager) => (): void => {
-  const [state, dispatch] = stateManager;
-  const currentPosition = state.mousePosition;
-  const canZoomIn = currentPosition.zoom < Config.maxZoom;
-  canZoomIn &&
-    dispatch({
-      type: "setMousePosition",
-      value: {
-        ...currentPosition,
-        zoom: currentPosition.zoom * Config.zoomMultiplier,
-      },
-    });
+  const [state] = stateManager;
+  const canZoomIn = state.mousePosition.zoom < Config.maxZoom;
+  if (canZoomIn) {
+    const newPosition = {
+      ...state.mousePosition,
+      zoom: state.mousePosition.zoom * Config.zoomMultiplier,
+    };
+
+    handleMoveEnd(stateManager)(newPosition);
+  }
 };
 
 export const handleZoomOut = (stateManager: Types.StateManager) => (): void => {
-  const [state, dispatch] = stateManager;
-  const currentPosition = state.mousePosition;
-  const canZoomOut = currentPosition.zoom > Config.minZoom;
-  canZoomOut &&
-    dispatch({
-      type: "setMousePosition",
-      value: {
-        ...currentPosition,
-        zoom: currentPosition.zoom / Config.zoomMultiplier,
-      },
-    });
+  const [state] = stateManager;
+  const canZoomOut = state.mousePosition.zoom > Config.minZoom;
+  if (canZoomOut) {
+    const newPosition = {
+      ...state.mousePosition,
+      zoom: state.mousePosition.zoom / Config.zoomMultiplier,
+    };
+
+    handleMoveEnd(stateManager)(newPosition);
+  }
 };
 
 ////////////////////////
@@ -68,18 +99,23 @@ export const handleMarkerOnClick = (
   givenCombinedRow: Types.CombinedRow,
   givenRow: Types.Row
 ) => (): void => {
-  const highlightMultipleRows = Renderers.rowIsDefault(givenRow);
-  const betweenAnySiblings = givenCombinedRow.rows.indexOf(givenRow);
-  const aboveAllSiblings = 0;
-  const rowIndexRelativeToSiblings = highlightMultipleRows
-    ? aboveAllSiblings
-    : betweenAnySiblings;
+  const rowIndexRelativeToSiblings = getRowIndex(givenCombinedRow, givenRow);
   dispatch({ type: "setCurrentCombinedRows", value: [givenCombinedRow] });
   dispatch({ type: "setCurrentRow", value: givenRow });
   handleWaypointsTableScrollbar(
     givenCombinedRow.index,
     rowIndexRelativeToSiblings
   );
+};
+
+const getRowIndex = (
+  givenCombinedRow: Types.CombinedRow,
+  givenRow: Types.Row
+): number => {
+  const highlightMultipleRows = Renderers.rowIsDefault(givenRow);
+  const betweenAnySiblings = givenCombinedRow.rows.indexOf(givenRow);
+  const aboveAllSiblings = 0;
+  return highlightMultipleRows ? aboveAllSiblings : betweenAnySiblings;
 };
 
 export const handleWaypointsTableScrollbar = (
@@ -117,18 +153,17 @@ const getFirstRowOffset = (
 // FilterOptions.tsx
 //////////////////////
 
-export const handleVisibilityToggle = (
+export const handleSyncToggle = (
   stateManager: Types.StateManager
 ) => (): void => {
   const [state, dispatch] = stateManager;
-  dispatch({ type: "toggleVisibility", value: !state.useMarkerVisibility });
+  dispatch({ type: "toggleSync", value: !state.syncMapAndTable });
 };
 
 export const handleInputText = (stateManager: Types.StateManager) => (
   event: React.ChangeEvent<HTMLInputElement>
 ): void => {
   const [, dispatch] = stateManager;
-  dispatch({ type: "toggleSearchBarQuery", value: true });
   dispatch({ type: "setSearchBarContent", value: event.target.value });
 };
 
@@ -136,7 +171,6 @@ export const handleInputClear = (
   stateManager: Types.StateManager
 ) => (): void => {
   const [, dispatch] = stateManager;
-  dispatch({ type: "toggleSearchBarQuery", value: false });
   dispatch({
     type: "setSearchBarContent",
     value: Config.defaultSearchBarContent,
