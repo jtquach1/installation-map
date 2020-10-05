@@ -13,8 +13,6 @@ export const baseRadius = 5;
 export const baseStrokeThickness = 1;
 export const baseTranslateOffset = 12;
 export const baseZoomThreshold = 16;
-export const defaultMarkerColor = "#3786C2";
-export const highlightedMarkerColor = "#8bc5f1";
 export const maxZoom = 128;
 export const minZoom = 1;
 export const zoomMultiplier = 2;
@@ -26,7 +24,7 @@ export const rootContainerName = "root";
 export const scrollableTableName = "tableFixHead";
 export const waypointsHeadName = "waypoints-head";
 export const enableHighlight = "highlighted";
-export const disableHighlight = "";
+export const disableHighlight = "unhighlighted";
 
 /**
  * World map JSON Url:
@@ -36,7 +34,8 @@ export const disableHighlight = "";
  * relatively fast and detailed. 50m simplified is faster.
  * */
 export const simpleMap = "world-110m.json";
-export const detailedMap = "combined.topojson";
+export const detailedMapNoStates = "detailed-no-states.topojson";
+export const detailedMapWithStates = "detailed-with-states.topojson";
 
 /**
  * Default values
@@ -103,14 +102,6 @@ export const markerDetailMap: Types.MarkerDetail[] = [
     key: "address",
     header: "Address",
     getRowPropContent: (rowProp: string) => rowProp,
-  },
-  {
-    key: "coordinates",
-    header: "Coordinates",
-    getRowPropContent: (rowProp: Point) => {
-      const [lng, lat] = rowProp;
-      return `(${lng}, ${lat})`;
-    },
   },
 ];
 

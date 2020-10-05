@@ -15,7 +15,8 @@ const RowMarker = (props: Types.RowMarkerProps): JSX.Element => {
   const combinedName = Renderers.getCombinedName(givenRow);
   const zoomedInEnoughToDisplay = Renderers.displayOnLargeZoom(currentZoom);
   const mapMarkerTransform = Renderers.handleMarkerTransform(currentZoom);
-  const mapMarkerColor = Renderers.getMapMarkerColor(givenRow, currentRows);
+  const highlightValidRow = Renderers.getHighlightClass(givenRow, currentRows);
+  const markerHighlight = highlightValidRow(true);
   const getVisibleClass = props.isVisible ? "" : "invisible";
 
   return (
@@ -29,7 +30,10 @@ const RowMarker = (props: Types.RowMarkerProps): JSX.Element => {
       id={StateUpdaters.getMarkerIdentifier(givenRow.index)}
       className={getVisibleClass}
     >
-      <PlaceIcon transform={mapMarkerTransform} markerColor={mapMarkerColor} />
+      <PlaceIcon
+        transform={mapMarkerTransform}
+        markerHighlight={markerHighlight}
+      />
       {zoomedInEnoughToDisplay &&
         Renderers.createMarkerText(
           combinedName,
