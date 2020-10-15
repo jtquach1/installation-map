@@ -54,14 +54,13 @@ FILENAME_TO_COUNTRY = {
 LINKS = [
     # React Simple Maps
     'https://github.com/zcreativelabs/react-simple-maps/raw/master/topojson-maps/world-110m.json',
-    # exploratory.io
+    # exploratory.io, may have to download manually
     'https://download2.exploratory.io/maps/states.zip',
     'https://download2.exploratory.io/maps/canada_provinces.zip',
     'https://download2.exploratory.io/maps/aus_states.zip',
-    # May have to download this manually
     'https://download2.exploratory.io/maps/br_regions.zip',  # not MIT licensed
     # Joost Hietbrink
-    'https://www.webuildinternet.com/articles/2015-07-19-geojson-data-of-the-netherlands/provinces.geojson',  # unknown
+    'https://www.webuildinternet.com/articles/2015-07-19-geojson-data-of-the-netherlands/provinces.geojson',  # not MIT licensed
     # deldersveld
     'https://github.com/deldersveld/topojson/raw/master/countries/algeria/algeria-provinces.json',
     'https://github.com/deldersveld/topojson/raw/master/countries/argentina/argentina-provinces.json',
@@ -119,23 +118,11 @@ PUBLIC_DIR = '%s%s%s' % (HOME_DIR, REPO_ROOT, 'public/')
 
 def remove_old_files(maps_path):
     os.chdir(maps_path)
-    print('Removing old .simple, .merged, and .geojson files')
+    print('Removing old .txt, .simple, .merged, and .geojson files')
+    os.system('rm *.txt')
     os.system('rm *.simple')
     os.system('rm *.merged')
     os.system('rm *.geojson')
-
-
-def get_files_not_downloaded(maps_path, links):
-    os.chdir(maps_path)
-    current_files = os.listdir(maps_path)
-    files = []
-    for link in links:
-        temp = link.split("/")
-        last = len(temp) - 1
-        filename = temp[last]
-        if not filename in current_files:
-            files.append(link)
-    return files
 
 
 def get_jsons(maps_path, links):
@@ -278,24 +265,25 @@ def merge_topojson_states(maps_path, filelist, filename_map):
 
 
 def convert_topo2geo(maps_path, filelist, input_suffix):
-    def byte_string_to_string(line):
-        return line.decode('utf-8').split("\n")[0]
-
     os.chdir(maps_path)
     topo2geo = '%stopo2geo' % YARN_DIR
-    output = []
     filelist.append(BASE_MAP)
+    os.system("> objects.txt")
 
-    # get list of all simplified topojsons with their objects
+    # Get list of all simplified topojsons with their objects
     for f in filelist:
-        input_file = '%s%s' % (f.split(".")[0], input_suffix)
+        prefix = f.split(".")[0]
+        input_file = '%s%s' % (prefix, input_suffix)
+        command = '%s -l -i %s >> objects.txt' % (topo2geo, input_file)
+        os.system(command)
 
-        # capture standard output to a list
-        command = '%s -l < %s' % (topo2geo, input_file)
-        output.append(subprocess.check_output(command, shell=True))
+    # Since files must end with a newline in UNIX, the last element is empty.
+    # So, we must remove it, or else we zip through lists of uneven length.
+    f = open('objects.txt', 'r+')
+    objects = f.read().split("\n")[:-1]
+    f.close()
 
-    converted = list(map(byte_string_to_string, output))
-    for object, f in zip(converted, filelist):
+    for object, f in zip(objects, filelist):
         prefix = f.split(".")[0]
         input_file = '%s%s' % (prefix, input_suffix)
         output_file = '%s.geojson' % input_file
@@ -321,7 +309,7 @@ def convert_geo2topo(maps_path, input_geojson, output_topojson):
 
 def deploy_to_public(maps_path, input_topojson, public_path):
     os.chdir(maps_path)
-    os.system('mv %s %s' % (input_topojson, public_path))
+    os.system('cp %s %s' % (input_topojson, public_path))
 
 
 def main():
@@ -337,7 +325,7 @@ def main():
     remove_old_files(MAPS_DIR)
 
     # Get JSONs for processing, will need to convert some GeoJSONs to TopoJSON
-    get_jsons(MAPS_DIR, LINKS)
+    # get_jsons(MAPS_DIR, LINKS)
 
     # Remove illegal single quote from Peru objects name
     remove_peru_objects_illegal_char(PERU_MAP_DIR)
