@@ -50,8 +50,9 @@ def create_waypoints(input_sheet):
         final = []
     finally:
         keys = extract_keys()
-        filtered = list(filter(lambda row: is_successful(row, keys), rows))
-        waypoints = list(map(lambda row: create_waypoint(row, keys), filtered))
+        approved = list(filter(is_approved(keys), rows))
+        successes = list(filter(is_successful(keys), approved))
+        waypoints = list(map(create_waypoint(keys), successes))
         valid_waypoints = list(filter(is_valid, waypoints))
         final += valid_waypoints
         out_file = open(input_sheet, 'w')
@@ -83,38 +84,61 @@ def extract_keys():
     return keys
 
 
-def is_successful(row, keys):
+def is_approved(keys):
+    """
+    Checks whether an array row designates an approved installation.
+    """
+    def predicate(row):
+        i = keys.index('Approved')
+        try:
+            approved = row[i].lower() == 'yes'
+        except IndexError:
+            approved = False
+        finally:
+            return approved
+
+    return predicate
+
+
+def is_successful(keys):
     """
     Checks whether an array row designates a successful installation, based on
     the values corresponding to the column headers.
     """
-    i = keys.index('Have you already tried to deploy (install) cBioPortal?')
-    j = keys.index('Success?')
-    try:
-        successful = row[i] != 'Not yet' and row[j] == 'Yes'
-    except IndexError:
-        successful = False
-    finally:
-        return successful
+    def predicate(row):
+        i = keys.index(
+            'Have you already tried to deploy (install) cBioPortal?')
+        j = keys.index('Success?')
+        try:
+            successful = row[i] != 'Not yet' and row[j] == 'Yes'
+        except IndexError:
+            successful = False
+        finally:
+            return successful
+
+    return predicate
 
 
-def create_waypoint(row, keys):
+def create_waypoint(keys):
     """
     Given a geocode_result array, header keys, and row array, this creates a
     dictionary waypoint. If geocode_result is empty, then return an empty 
     waypoint. 
     """
-    city = row[keys.index('City')]
-    state = row[keys.index('State / Province')]
-    country = row[keys.index('Country')]
-    geocode_result = extract_geocode_result(city, state, country)
-    if not geocode_result:
-        return {}
-    waypoint = convert_array_to_dict(keys, row)
-    waypoint = add_coordinates_and_address(geocode_result, waypoint)
-    waypoint = remove_extraneous_columns(waypoint)
-    waypoint = rename_keys(waypoint)
-    return waypoint
+    def predicate(row):
+        city = row[keys.index('City')]
+        state = row[keys.index('State / Province')]
+        country = row[keys.index('Country')]
+        geocode_result = extract_geocode_result(city, state, country)
+        if not geocode_result:
+            return {}
+        waypoint = convert_array_to_dict(keys, row)
+        waypoint = add_coordinates_and_address(geocode_result, waypoint)
+        waypoint = remove_extraneous_columns(waypoint)
+        waypoint = rename_keys(waypoint)
+        return waypoint
+
+    return predicate
 
 
 def is_valid(waypoint):
