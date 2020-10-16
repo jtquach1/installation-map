@@ -90,7 +90,7 @@ body {
 .rsm-marker .highlighted {
   fill: var(--highlighted-marker-color);
   transform-origin: 2% 4%;
-  animation: grow-shrink 2.5s infinite;
+  animation: grow-shrink 2.5s forwards;
 }
 
 .rsm-marker .unhighlighted {
