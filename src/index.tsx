@@ -19,7 +19,7 @@ const App = (): JSX.Element => {
   ]);
 
   // Update visibility after all Markers have been rendered into DOM
-  useLayoutEffect(StateUpdaters.updateMarkerVisibility(stateManager), [
+  useLayoutEffect(StateUpdaters.updateMarkerVisibilities(stateManager), [
     state.allCombinedRows,
     state.currentCombinedRows,
   ]);

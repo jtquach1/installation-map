@@ -287,13 +287,6 @@ const createCombinedRow = (
   };
 };
 
-export const getMarkerVisibility = (index: number): Types.Visibility => {
-  const elementId = getMarkerIdentifier(index);
-  const svgMarker = document.getElementById(elementId);
-  const isMarkerVisible = elementIsInViewport(svgMarker);
-  return isMarkerVisible;
-};
-
 const elementIsInViewport = (element: HTMLElement | null): Types.Visibility => {
   const rectangle = element?.getBoundingClientRect();
   const mapContainer = document.getElementById(Config.mapContainerName);
@@ -338,16 +331,12 @@ const getViewportLimits = (
   return { top, right, bottom, left };
 };
 
-export const updateMarkerVisibility = (
+export const updateMarkerVisibilities = (
   stateManager: Types.StateManager
 ): React.EffectCallback => () => {
   const [state, dispatch] = stateManager;
-  state.allCombinedRows.forEach((combinedRow) => {
-    combinedRow.isMarkerVisible = getMarkerVisibility(combinedRow.index);
-  });
-  state.currentCombinedRows.forEach((combinedRow) => {
-    combinedRow.isMarkerVisible = getMarkerVisibility(combinedRow.index);
-  });
+  state.allCombinedRows.forEach(mutateVisibility);
+  state.currentCombinedRows.forEach(mutateVisibility);
   dispatch({
     type: "setAllCombinedRows",
     value: state.allCombinedRows,
@@ -356,6 +345,17 @@ export const updateMarkerVisibility = (
     type: "setCurrentCombinedRows",
     value: state.currentCombinedRows,
   });
+};
+
+const mutateVisibility = (combinedRow: Types.CombinedRow): void => {
+  combinedRow.isMarkerVisible = getMarkerVisibility(combinedRow.index);
+};
+
+const getMarkerVisibility = (index: number): Types.Visibility => {
+  const elementId = getMarkerIdentifier(index);
+  const svgMarker = document.getElementById(elementId);
+  const isMarkerVisible = elementIsInViewport(svgMarker);
+  return isMarkerVisible;
 };
 
 //////////////////
