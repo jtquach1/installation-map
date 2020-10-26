@@ -31,3 +31,5 @@ env.sh
 __pycache__/
 
 /maps
+
+*.dockerfile

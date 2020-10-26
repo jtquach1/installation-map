@@ -1,5 +1,6 @@
 import os
 import json
+import subprocess
 
 # Everything ending in .json is in TopoJSON format, and GeoJSON otherwise
 FILENAME_TO_COUNTRY = {

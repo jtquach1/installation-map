@@ -5,23 +5,24 @@ from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 import googlemaps
+from datetime import datetime
 import json
-from itertools import zip_longest
+from apscheduler.schedulers.blocking import BlockingScheduler
 
-# Google Sheets API
+### Google Sheets API ###
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
 
 # The ID and range of a spreadsheet.
 SPREADSHEET_ID = os.getenv("SPREADSHEET_ID")
-COLS = "A:A F:M"
+COLS = "E:L"
 
-# Geocoding API
+### Geocoding API ###
 GEOCODING_API_KEY = os.getenv("GEOCODING_API_KEY")
 
 # Specified directory and file
-SRC_DIR = "./src"
-WAYPOINTS = "%s/waypoints.json" % SRC_DIR
+STATIC_DIR = "./build/static"
+WAYPOINTS = "%s/waypoints.json" % STATIC_DIR
 
 
 def create_waypoints(input_sheet):
@@ -49,8 +50,8 @@ def create_waypoints(input_sheet):
             )
     except FileNotFoundError:
         print('File "' + input_sheet + '" does not already exist. Creating.')
-        if not os.path.exists(SRC_DIR):
-            os.makedirs(SRC_DIR)
+        if not os.path.exists(STATIC_DIR):
+            os.makedirs(STATIC_DIR)
         final = []
     finally:
         keys = extract_keys()
@@ -207,7 +208,7 @@ def extract_values(scopes, spreadsheet_id, ranges):
     column_values = []
     for response in value_ranges:
         column_values.extend(response.get("values", []))
-    values_as_list_of_tuples = list(zip_longest(*column_values, fillvalue=""))
+    values_as_list_of_tuples = list(zip(*column_values))
     dump = json.dumps(values_as_list_of_tuples)
     row_values = json.loads(dump)
     return row_values
@@ -317,7 +318,6 @@ def remove_extraneous_columns(row):
     row.pop("City")
     row.pop("State / Province")
     row.pop("Country")
-    row.pop("Approved")
     return row
 
 
@@ -342,4 +342,6 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    scheduler = BlockingScheduler()
+    scheduler.add_job(main, trigger="cron", hour="*", minute="*", second="0")
+    scheduler.start()
