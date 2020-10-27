@@ -17,6 +17,18 @@ const SideBar = (props: Types.SideBarProps): JSX.Element => {
 
   return (
     <div className="sidebar" style={{ width: props.width }}>
+      <div id="description">
+        <h1>Description</h1>
+        <p>
+          This map shows the public and private local instances of the
+          cBioPortal. If you are running a local instance that is not included
+          in this list, please complete{" "}
+          <a href="https://docs.google.com/forms/d/e/1FAIpQLSflQdN956q7Xh5caO8z8jIaF6uMLBkKrSxFvPi8OhNBWB247w/viewform">
+            this survey
+          </a>{" "}
+          to add it to the map.
+        </p>
+      </div>
       <div id="waypoints">
         <h1>cBioPortal Instances</h1>
         <FilterOptions stateManager={props.stateManager} />
