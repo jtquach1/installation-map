@@ -18,6 +18,7 @@ const RowMarker = (props: Types.RowMarkerProps): JSX.Element => {
   const highlightValidRow = Renderers.getHighlightClass(givenRow, currentRows);
   const markerHighlight = highlightValidRow(true);
   const getVisibleClass = props.isVisible ? "" : "invisible";
+  const numberOfRows = givenRow.rows.length;
 
   return (
     <Marker
@@ -33,13 +34,10 @@ const RowMarker = (props: Types.RowMarkerProps): JSX.Element => {
       <PlaceIcon
         transform={mapMarkerTransform}
         markerHighlight={markerHighlight}
+        numberOfRows={numberOfRows}
       />
       {zoomedInEnoughToDisplay &&
-        Renderers.createMarkerText(
-          combinedName,
-          givenRow.rows.length,
-          currentZoom
-        )}
+        Renderers.createMarkerText(combinedName, numberOfRows, currentZoom)}
     </Marker>
   );
 };
