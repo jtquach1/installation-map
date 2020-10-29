@@ -125,7 +125,6 @@ export interface RowMarkerProps {
 export interface PlaceIconProps {
   transform: string;
   markerHighlight: string;
-  numberOfRows: number;
 }
 
 export interface componentToIdentifier {
