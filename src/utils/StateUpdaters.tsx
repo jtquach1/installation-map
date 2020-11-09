@@ -287,15 +287,15 @@ const createCombinedRow = (
   };
 };
 
-const elementIsInViewport = (element: HTMLElement | null): Types.Visibility => {
+const elementIsInViewport = (
+  element: HTMLElement | null,
+  limits: Types.Limits
+): Types.Visibility => {
   const rectangle = element?.getBoundingClientRect();
-  const mapContainer = document.getElementById(Config.mapContainerName);
-  const rootContainer = document.getElementById(Config.rootContainerName);
   const elementNotValid = !element || 1 !== element.nodeType;
-  if (elementNotValid || !rectangle || !mapContainer || !rootContainer) {
+  if (elementNotValid || !rectangle || !limits) {
     return undefined;
   } else {
-    const limits = getViewportLimits(rootContainer, mapContainer);
     const withinVerticalBounds = rectInVerticalBounds(rectangle, limits);
     const withinHorizontalBounds = rectInHorizontalBounds(rectangle, limits);
     return withinVerticalBounds && withinHorizontalBounds;
@@ -306,37 +306,27 @@ const rectInVerticalBounds = (
   rectangle: DOMRect,
   limits: Types.Limits
 ): boolean => {
-  return rectangle.bottom >= limits.bottom && rectangle.top < limits.top;
+  return !limits
+    ? false
+    : rectangle.bottom >= limits.top && rectangle.top <= limits.bottom;
 };
 
 const rectInHorizontalBounds = (
   rectangle: DOMRect,
   limits: Types.Limits
 ): boolean => {
-  return rectangle.right >= limits.right && rectangle.left < limits.left;
-};
-
-const getViewportLimits = (
-  rootContainer: HTMLElement,
-  mapContainer: HTMLElement
-): Types.Limits => {
-  const rootHeight = rootContainer.clientHeight;
-  const mapHeight = mapContainer.clientHeight;
-  const rootWidth = rootContainer.clientWidth;
-  const mapWidth = mapContainer.clientWidth;
-  const top = rootHeight;
-  const bottom = rootHeight - mapHeight;
-  const right = rootWidth - mapWidth;
-  const left = rootWidth;
-  return { top, right, bottom, left };
+  return !limits
+    ? false
+    : rectangle.right >= limits.left && rectangle.left <= limits.right;
 };
 
 export const updateMarkerVisibilities = (
   stateManager: Types.StateManager
 ): React.EffectCallback => () => {
   const [state, dispatch] = stateManager;
-  state.allCombinedRows.forEach(mutateVisibility);
-  state.currentCombinedRows.forEach(mutateVisibility);
+  const limits = getViewportLimits();
+  state.allCombinedRows.forEach(mutateVisibility(limits));
+  state.currentCombinedRows.forEach(mutateVisibility(limits));
   dispatch({
     type: "setAllCombinedRows",
     value: state.allCombinedRows,
@@ -347,14 +337,32 @@ export const updateMarkerVisibilities = (
   });
 };
 
-const mutateVisibility = (combinedRow: Types.CombinedRow): void => {
-  combinedRow.isMarkerVisible = getMarkerVisibility(combinedRow.index);
+const getViewportLimits = (): Types.Limits => {
+  const mapContainer = document.getElementById(Config.mapContainerName);
+  const rectangle = mapContainer?.getBoundingClientRect();
+  if (!rectangle) {
+    return undefined;
+  }
+  const top = rectangle.top;
+  const bottom = rectangle.bottom;
+  const right = rectangle.right;
+  const left = rectangle.left;
+  return { top, right, bottom, left };
 };
 
-const getMarkerVisibility = (index: number): Types.Visibility => {
+const mutateVisibility = (limits: Types.Limits) => (
+  combinedRow: Types.CombinedRow
+): void => {
+  combinedRow.isMarkerVisible = getMarkerVisibility(combinedRow.index, limits);
+};
+
+const getMarkerVisibility = (
+  index: number,
+  limits: Types.Limits
+): Types.Visibility => {
   const elementId = getMarkerIdentifier(index);
   const svgMarker = document.getElementById(elementId);
-  const isMarkerVisible = elementIsInViewport(svgMarker);
+  const isMarkerVisible = elementIsInViewport(svgMarker, limits);
   return isMarkerVisible;
 };
 

@@ -55,7 +55,7 @@ const didCoordinatesChange = (
   const newCoordinates = newPosition.coordinates;
   const originalCoordinates = originalPosition.coordinates;
   return (
-    newCoordinates[0] !== originalCoordinates[0] &&
+    newCoordinates[0] !== originalCoordinates[0] ||
     newCoordinates[1] !== originalCoordinates[1]
   );
 };

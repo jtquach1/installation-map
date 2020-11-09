@@ -73,12 +73,14 @@ export type FilterPredicate = (combinedRow: CombinedRow) => boolean;
 
 export type DisplayedPair = { name: string; fontStyle: string };
 
-export type Limits = {
-  top: number;
-  right: number;
-  bottom: number;
-  left: number;
-};
+export type Limits =
+  | {
+      top: number;
+      right: number;
+      bottom: number;
+      left: number;
+    }
+  | undefined;
 
 export interface SideBarProps {
   stateManager: StateManager;
