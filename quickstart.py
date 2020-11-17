@@ -328,7 +328,7 @@ def rename_keys(row):
     """
     row["institution"] = row.pop("Institution or Company Name")
     row["category"] = row.pop("Category")
-    row["lab"] = row.pop("Lab / Group")
+    row["lab"] = row.pop("Contact Name / Group or Lab ")
     return row
 
 
