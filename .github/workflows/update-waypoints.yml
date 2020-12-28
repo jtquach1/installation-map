@@ -47,7 +47,7 @@ jobs:
         run: |
           export SPREADSHEET_ID="$GOOGLE_SPREADSHEET_ID"
           export GEOCODING_API_KEY="$GOOGLE_GEOCODING_API_KEY"
-          python3 quickstart.py
+          python3 update_waypoints.py
         env:
           GOOGLE_SPREADSHEET_ID: ${{ secrets.GOOGLE_SPREADSHEET_ID }}
           GOOGLE_GEOCODING_API_KEY: ${{ secrets.GOOGLE_GEOCODING_API_KEY }}
