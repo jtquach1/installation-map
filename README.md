@@ -1,44 +1,62 @@
-# This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app)
+# cBioPortal Installation Map
 
-## Available Scripts
+## Table of Contents
 
-In the project directory, you can run:
+- [General information](#general-information)
+- [Technologies](#technologies)
+- [Setup](#setup)
 
-### `yarn start`
+## General information
 
-Runs the app in the development mode.  
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+This project features successful user installations of [cBioPortal](https://www.cbioportal.org/), as indicated by data from the [cBioPortal Deployment Survey](https://docs.google.com/forms/d/e/1FAIpQLSflQdN956q7Xh5caO8z8jIaF6uMLBkKrSxFvPi8OhNBWB247w/viewform). One can also view the project [here](https://www.cbioportal.org/installations) and [here](https://installationmap.netlify.app/).
 
-The page will reload if you make edits.  
-You will also see any lint errors in the console.
+### Features
 
-### `yarn test`
+- Search and filter map markers by institution, lab, or address
+  ![search_and_filter](https://user-images.githubusercontent.com/33106214/103242175-52fe1b80-4923-11eb-91ae-4cde5b1b5bda.gif)
+- Pan and zoom (buttons or scroll-wheel)
+  ![pan_and_zoom](https://user-images.githubusercontent.com/33106214/103242026-e551ef80-4922-11eb-98cd-789a38b4d7da.gif)
+- Sync map and table
+  ![sync_map_and_table](https://user-images.githubusercontent.com/33106214/103242217-745f0780-4923-11eb-92d1-7dc0a9e04288.gif)
+- Split or merge map markers based on zoom level
+  ![split_or_merge_markers](https://user-images.githubusercontent.com/33106214/103242486-534ae680-4924-11eb-9e40-2167c0a48b98.gif)
+- Render country borders with amount of detail based on zoom level
+  ![country_borders](https://user-images.githubusercontent.com/33106214/103242453-34e4eb00-4924-11eb-9ed9-059bbf389e12.gif)
+- Select map markers via clicking in table or on map
+  ![select_markers](https://user-images.githubusercontent.com/33106214/103242556-986f1880-4924-11eb-8f95-f1c9ce018138.gif)
+- Render in small or full mode; append `?small=1` at end of URL for the former
 
-Launches the test runner in the interactive watch mode.  
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+|                                                 small mode (sidebar)                                                 |                                                      full mode                                                      |
+| :------------------------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------------------: |
+| ![small_mode](https://user-images.githubusercontent.com/33106214/103241223-96a35600-4920-11eb-9193-871a00d6ab4f.png) | ![full_mode](https://user-images.githubusercontent.com/33106214/103241225-986d1980-4920-11eb-922f-510dcf9ece97.png) |
 
-### `yarn build`
+## Technologies
 
-Builds the app for production to the `build` folder.  
-It correctly bundles React in production mode and optimizes the build for the best performance.
+This project was created with:
 
-The build is minified and the filenames include the hashes.  
-Your app is ready to be deployed!
+- [Create React App](https://github.com/facebook/create-react-app)
+  - Bootstraps the project
+- [GitHub Actions](https://docs.github.com/en/free-pro-team@latest/actions)
+  - For updating map marker data when users fill out the survey
+- [Google Geocoding API](https://developers.google.com/maps/documentation/geocoding/overview)
+  - For translating location data from survey responses into longitude, latitude coordinates
+- [Google Sheets API](https://developers.google.com/sheets/api/)
+  - For fetching and storing survey response data into JSON format
+- [Netlify](https://www.netlify.com/)
+  - For hosting the React project
+- [Python 3](https://www.python.org/)
+  - For updating the map marker and geographical data
+- [React 16.13.1](https://github.com/facebook/react)
+- [React Simple Maps 2.1.2](https://github.com/zcreativelabs/react-simple-maps)
+  - Convenient for rendering map marker data, countries
+- [TypeScript 3.7.2](https://github.com/Microsoft/TypeScript)
+  - For type checking and readable code
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Setup
 
-### `yarn eject`
+This section features the steps to run this project locally.
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+- Clone the repository by doing `git clone https://github.com/jtquach1/installation-map.git`.
+- Install the necessary dependencies by doing `yarn`.
+- Make a development build by doing `yarn start`.
+- View the project at [http://localhost:3006](http://localhost:3006).
