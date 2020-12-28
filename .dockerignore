@@ -1,8 +1,0 @@
-node_modules
-build
-docker
-.dockerignore
-Dockerfile
-Dockerfile.prod
-host_frontend.dockerfile
-create_json.dockerfile
